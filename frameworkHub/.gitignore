@@ -1,0 +1,29 @@
+# ============================================
+# FrameworkHub .gitignore
+# ============================================
+
+# 依赖
+node_modules/
+
+# 数据库（包含用户上传的工作流）
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# 日志
+logs/
+*.log
+
+# 环境变量
+.env
+.env.local
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+

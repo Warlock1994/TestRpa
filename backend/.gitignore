@@ -1,0 +1,48 @@
+# ============================================
+# Backend .gitignore
+# ============================================
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虚拟环境（如果有）
+venv/
+env/
+ENV/
+
+# 上传文件（用户数据）
+uploads/
+browser_data/
+
+# AI 模型文件（体积巨大）
+data/easyocr_models/
+data/whisper_models/
+
+# 数据文件（用户数据）
+data/scheduled_tasks.json
+data/scheduled_task_logs.json
+
+# 日志
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# 环境变量
+.env
+.env.local

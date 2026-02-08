@@ -1,0 +1,206 @@
+# ============================================
+# WebRPA 项目 .gitignore
+# ============================================
+
+# ============================================
+# 运行环境（体积巨大，不应提交到仓库）
+# ============================================
+
+# Python 3.13 运行环境（约 1-2GB）
+Python313/
+
+# Node.js 运行环境（约 100-200MB）
+nodejs/
+
+# NapCat QQ机器人框架
+NapCat/
+
+# ============================================
+# 依赖包和构建产物
+# ============================================
+
+# Node.js 依赖
+node_modules/
+**/node_modules/
+
+# Python 缓存
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 前端构建产物
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+
+# ============================================
+# 数据库和数据文件
+# ============================================
+
+# SQLite 数据库
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# 工作流数据
+frameworkHub/data/workflows.db
+
+# 定时任务数据
+backend/data/scheduled_tasks.json
+backend/data/scheduled_task_logs.json
+
+# ============================================
+# 上传和临时文件
+# ============================================
+
+# 后端上传文件
+backend/uploads/
+backend/browser_data/
+
+# Excel 和图片资源（用户上传的文件）
+backend/uploads/excel/
+backend/uploads/images/
+
+# AI 模型文件（体积巨大）
+backend/data/easyocr_models/
+backend/data/whisper_models/
+
+# ============================================
+# 日志文件
+# ============================================
+
+# 所有日志文件
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# 进程 PID 文件
+# ============================================
+
+*.pid
+.backend.pid
+.frontend.pid
+.frontend-nodes.pid
+
+# ============================================
+# 环境变量和配置
+# ============================================
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 用户配置（可能包含敏感信息）
+# WebRPAConfig.json 保留，因为是示例配置
+
+# ============================================
+# IDE 和编辑器
+# ============================================
+
+# VSCode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# 操作系统
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# 临时文件和缓存
+# ============================================
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+
+# 测试文件（自测后应删除）
+test_*.py
+test_*.js
+test_*.ts
+*_test.py
+*_test.js
+*_test.ts
+
+# 备份文件
+*.bak
+*.backup
+*.old
+*.orig
+
+# ============================================
+# 媒体处理工具（体积较大）
+# ============================================
+
+# FFmpeg 可执行文件（约 100MB）
+# backend/ffmpeg.exe
+# backend/ffprobe.exe
+# backend/m3u8.exe
+# backend/pandoc.exe
+
+# 注意：这些工具文件可以选择性提交
+# 如果不提交，用户需要自行下载
+
+# ============================================
+# 其他
+# ============================================
+
+# 压缩文件
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# Excel 测试文件
+table_data.xlsx
+
+# 工作流测试文件
+workflows/*.json
+!workflows/.gitkeep

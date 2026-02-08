@@ -1,0 +1,160 @@
+"""工作流解析器 - 将工作流JSON解析为可执行结构"""
+from typing import Optional
+from collections import defaultdict
+
+from app.models.workflow import Workflow, WorkflowNode, WorkflowEdge
+
+
+class ExecutionGraph:
+    """执行图 - 表示节点的执行顺序"""
+    
+    def __init__(self):
+        self.nodes: dict[str, WorkflowNode] = {}
+        self.edges: list[WorkflowEdge] = []
+        self.adjacency: dict[str, list[str]] = defaultdict(list)  # node_id -> [next_node_ids]
+        self.reverse_adjacency: dict[str, list[str]] = defaultdict(list)  # node_id -> [prev_node_ids]
+        self.start_nodes: list[str] = []  # 没有入边的节点
+        self.condition_branches: dict[str, dict[str, str]] = {}  # condition_node_id -> {handle: target_node_id}
+        self.loop_branches: dict[str, dict[str, list[str]]] = {}  # loop_node_id -> {handle: [target_node_ids]}
+        self.error_branches: dict[str, list[str]] = {}  # node_id -> [error_handler_node_ids]
+    
+    def get_node(self, node_id: str) -> Optional[WorkflowNode]:
+        return self.nodes.get(node_id)
+    
+    def get_next_nodes(self, node_id: str, handle: Optional[str] = None) -> list[str]:
+        """获取下一个要执行的节点ID列表"""
+        if handle and node_id in self.condition_branches:
+            # 条件分支
+            target = self.condition_branches[node_id].get(handle)
+            return [target] if target else []
+        if handle and node_id in self.loop_branches:
+            # 循环分支
+            return self.loop_branches[node_id].get(handle, [])
+        return self.adjacency.get(node_id, [])
+    
+    def get_loop_body_nodes(self, node_id: str) -> list[str]:
+        """获取循环体节点（loop handle）"""
+        if node_id in self.loop_branches:
+            return self.loop_branches[node_id].get('loop', [])
+        return []
+    
+    def get_loop_done_nodes(self, node_id: str) -> list[str]:
+        """获取循环结束后的节点（done handle）"""
+        if node_id in self.loop_branches:
+            return self.loop_branches[node_id].get('done', [])
+        return []
+    
+    def get_error_nodes(self, node_id: str) -> list[str]:
+        """获取异常处理节点（error handle）"""
+        return self.error_branches.get(node_id, [])
+    
+    def get_prev_nodes(self, node_id: str) -> list[str]:
+        """获取前置节点ID列表"""
+        return self.reverse_adjacency.get(node_id, [])
+    
+    def get_start_nodes(self) -> list[str]:
+        """获取起始节点ID列表"""
+        return self.start_nodes.copy()
+
+
+class WorkflowParser:
+    """工作流解析器"""
+    
+    def __init__(self, workflow: Optional[Workflow] = None):
+        self.workflow = workflow
+    
+    def parse(self, workflow: Optional[Workflow] = None) -> ExecutionGraph:
+        """解析工作流为执行图"""
+        wf = workflow or self.workflow
+        if not wf:
+            raise ValueError("没有提供工作流")
+        
+        graph = ExecutionGraph()
+        
+        # 需要跳过的视觉节点类型（不参与执行）
+        visual_node_types = {'group', 'note'}
+        
+        # 添加所有节点（跳过视觉节点，它们只是用于注释和分组）
+        for node in wf.nodes:
+            if node.type not in visual_node_types:
+                graph.nodes[node.id] = node
+        
+        # 添加所有边（跳过涉及视觉节点的边）
+        visual_node_ids = {node.id for node in wf.nodes if node.type in visual_node_types}
+        for edge in wf.edges:
+            if edge.source in visual_node_ids or edge.target in visual_node_ids:
+                continue
+            graph.edges.append(edge)
+        
+        # 构建邻接表
+        nodes_with_incoming = set()
+        for edge in graph.edges:
+            source_id = edge.source
+            target_id = edge.target
+            source_node = graph.nodes.get(source_id)
+            
+            # 处理异常处理分支（所有模块的 error handle）
+            if edge.sourceHandle == 'error':
+                if source_id not in graph.error_branches:
+                    graph.error_branches[source_id] = []
+                graph.error_branches[source_id].append(target_id)
+            # 处理条件分支（condition 和 face_recognition 模块的 true/false）
+            elif edge.sourceHandle and source_node and source_node.type in ('condition', 'face_recognition'):
+                if source_id not in graph.condition_branches:
+                    graph.condition_branches[source_id] = {}
+                graph.condition_branches[source_id][edge.sourceHandle] = target_id
+            # 处理循环分支（loop/foreach 模块的 loop/done）
+            elif edge.sourceHandle and source_node and source_node.type in ('loop', 'foreach'):
+                if source_id not in graph.loop_branches:
+                    graph.loop_branches[source_id] = {'loop': [], 'done': []}
+                if edge.sourceHandle in graph.loop_branches[source_id]:
+                    graph.loop_branches[source_id][edge.sourceHandle].append(target_id)
+            else:
+                graph.adjacency[source_id].append(target_id)
+            
+            graph.reverse_adjacency[target_id].append(source_id)
+            nodes_with_incoming.add(target_id)
+        
+        # 找出起始节点（没有入边的节点）
+        for node_id in graph.nodes:
+            if node_id not in nodes_with_incoming:
+                graph.start_nodes.append(node_id)
+        
+        return graph
+    
+    def validate(self, workflow: Workflow) -> tuple[bool, list[str]]:
+        """验证工作流的有效性"""
+        errors = []
+        
+        # 检查是否有节点
+        if not workflow.nodes:
+            errors.append("工作流没有任何节点")
+            return False, errors
+        
+        # 检查节点ID唯一性
+        node_ids = [node.id for node in workflow.nodes]
+        if len(node_ids) != len(set(node_ids)):
+            errors.append("存在重复的节点ID")
+        
+        # 检查边引用的节点是否存在
+        node_id_set = set(node_ids)
+        for edge in workflow.edges:
+            if edge.source not in node_id_set:
+                errors.append(f"边的源节点不存在: {edge.source}")
+            if edge.target not in node_id_set:
+                errors.append(f"边的目标节点不存在: {edge.target}")
+        
+        # 检查是否有起始节点
+        graph = self.parse(workflow)
+        if not graph.start_nodes:
+            errors.append("工作流没有起始节点（所有节点都有入边，可能存在循环）")
+        
+        return len(errors) == 0, errors
+
+
+def parse_workflow(workflow_dict: dict) -> tuple[Workflow, ExecutionGraph]:
+    """便捷函数：解析工作流字典"""
+    workflow = Workflow(**workflow_dict)
+    parser = WorkflowParser()
+    graph = parser.parse(workflow)
+    return workflow, graph

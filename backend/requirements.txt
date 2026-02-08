@@ -1,0 +1,109 @@
+# Web RPA 后端依赖
+# 安装命令: pip install -r requirements.txt
+
+# Web框架
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-socketio>=5.11.0
+python-multipart>=0.0.12
+pydantic>=2.10.0
+aiofiles>=24.1.0
+
+# 浏览器自动化
+playwright>=1.49.0
+
+# 数据处理
+# 使用 rtcompat 版本以兼容老旧 CPU（不支持 AVX2 指令集）
+# 如果你的 CPU 支持 AVX2，可以使用普通版本以获得更好的性能：polars>=1.17.0
+# 如果遇到 "Illegal instruction" 错误，说明需要使用 rtcompat 版本
+polars[rtcompat]>=1.17.0
+xlsxwriter>=3.2.0
+xlrd>=2.0.0
+openpyxl>=3.1.0
+python-pptx>=0.6.21
+
+# HTML 转 Markdown（Firecrawl 模块）
+html2text>=2024.2.26
+beautifulsoup4>=4.12.0
+
+# HTTP请求
+httpx>=0.27.0
+
+# JSON路径解析（API触发器模块）
+jsonpath-ng>=1.6.0
+
+# 正则表达式增强（支持可变长度后向断言）
+regex>=2024.0.0
+
+# 验证码识别
+# ddddocr 1.0.6 是 Python 3.13 唯一支持的版本
+ddddocr>=1.0.6
+
+# 图像识别（点击图像模块）
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# 文档转换（Pandoc模块 - 需要单独安装Pandoc: https://pandoc.org/installing.html）
+pypandoc>=1.13
+
+# 图像处理增强（Pillow扩展模块）
+pillow-heif>=0.18.0  # HEIF/HEIC格式支持
+piexif>=1.1.3  # EXIF元数据处理
+
+# 屏幕捕获（屏幕共享模块）
+mss>=9.0.0
+
+# Windows API（多显示器截图支持）
+pywin32>=306; sys_platform == 'win32'
+
+# 进程管理（浏览器进程清理）
+psutil>=5.9.0
+
+# 数据库
+pymysql>=1.1.0
+
+# 音频播放（支持几乎所有常见格式：mp3, wav, flac, aac, m4a, ogg, wma, opus等）
+# 需要将 ffmpeg.exe 和 ffprobe.exe 放到 backend 目录
+pydub>=0.25.0
+
+# 键鼠监听（宏录制器模块）
+pynput>=1.7.0
+
+# 键鼠模拟（微信自动化模块）
+pyautogui>=0.9.54
+
+# 代理抓包（用于抓取模拟器/手机APP的网络请求）
+mitmproxy>=10.0.0
+
+# 人脸识别（人脸触发器模块）
+# 注意：face_recognition 依赖 dlib，安装可能需要 CMake 和 Visual Studio Build Tools
+# Windows用户安装步骤：
+# 1. 安装 CMake: pip install cmake
+# 2. 安装 Visual Studio Build Tools (https://visualstudio.microsoft.com/downloads/)
+# 3. 安装 dlib: pip install dlib
+# 4. 安装 face_recognition: pip install face_recognition
+# 或者使用预编译的wheel: https://github.com/z-mahmud22/Dlib_Windows_Python3.x
+face_recognition>=1.3.0
+
+# PDF处理
+PyMuPDF>=1.24.0
+reportlab>=4.0.0
+
+# 二维码生成与解码
+qrcode>=7.4.0
+pyzbar>=0.1.9
+
+# 语音识别（音频转文本）
+SpeechRecognition>=3.10.0
+
+# OCR文字识别（点击文本、悬停文本模块）
+easyocr>=1.7.0
+
+# Cron表达式解析（定时触发器模块）
+croniter>=2.0.0
+
+# 任务调度（计划任务模块）
+APScheduler>=3.10.0
+
+# 安装完成后，还需要安装浏览器:
+# playwright install msedge
