@@ -3,6 +3,7 @@ import { Crosshair, Loader2 } from 'lucide-react'
 import { VariableInput } from './variable-input'
 import { Button } from './button'
 import { cn } from '@/lib/utils'
+import { getBackendUrl } from '@/services/api'
 
 interface CoordinateInputProps {
   xValue: string
@@ -33,7 +34,7 @@ export function CoordinateInput({
     setStatusText('Ctrl+左键 确认坐标 | Ctrl+右键 或 ESC 取消')
     
     try {
-      const response = await fetch('http://localhost:8000/api/system/pick-mouse-position', {
+      const response = await fetch(`${getBackendUrl()}/api/system/pick-mouse-position`, {
         method: 'POST',
       })
       

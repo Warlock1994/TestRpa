@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Play, Pause, Repeat, Volume2, VolumeX, Maximize, Minimize } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
+import { getBackendUrl } from '@/services/api'
 
 interface VideoPlayerDialogProps {
   videoUrl: string
@@ -63,7 +64,7 @@ export function VideoPlayerDialog({ videoUrl, waitForEnd, onClose }: VideoPlayer
     setLoadingMessage('正在转换视频格式...')
     
     try {
-      const response = await fetch('http://localhost:8000/api/system/convert-video', {
+      const response = await fetch(`${getBackendUrl()}/api/system/convert-video`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoUrl: url })
@@ -72,7 +73,7 @@ export function VideoPlayerDialog({ videoUrl, waitForEnd, onClose }: VideoPlayer
       const result = await response.json()
       
       if (result.success) {
-        return `http://localhost:8000${result.videoPath}`
+        return `${getBackendUrl()}${result.videoPath}`
       } else {
         console.error('[VideoPlayer] 转换失败:', result.error)
         return null
@@ -89,10 +90,10 @@ export function VideoPlayerDialog({ videoUrl, waitForEnd, onClose }: VideoPlayer
   const getVideoUrl = useCallback((url: string): string => {
     if (url.match(/^[A-Za-z]:[\\\/]/)) {
       // Windows 绝对路径
-      return `http://localhost:8000/api/system/local-file?path=${encodeURIComponent(url)}`
+      return `${getBackendUrl()}/api/system/local-file?path=${encodeURIComponent(url)}`
     } else if (url.startsWith('/') && !url.startsWith('//')) {
       // Unix 绝对路径
-      return `http://localhost:8000/api/system/local-file?path=${encodeURIComponent(url)}`
+      return `${getBackendUrl()}/api/system/local-file?path=${encodeURIComponent(url)}`
     }
     return url
   }, [])

@@ -17,6 +17,11 @@ export function getApiBaseUrl(): string {
   return API_BASE
 }
 
+// 获取后端完整 URL（包含协议和主机）
+export function getBackendUrl(): string {
+  return getBackendBaseUrl()
+}
+
 export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
@@ -825,3 +830,149 @@ export const localWorkflowApi = {
   }),
 }
 
+
+// 手机设备管理API
+export const phoneApi = {
+  // 获取已连接的设备列表
+  getDevices: () => request<{ devices: Array<{
+    id: string
+    model: string
+    status: string
+  }> }>('/phone/devices'),
+
+  // 获取设备信息
+  getDeviceInfo: (deviceId: string) => request<{
+    model: string
+    android_version: string
+    sdk_version: string
+    manufacturer: string
+    brand: string
+    device: string
+    serial: string
+    battery_level?: string
+    screen_resolution?: string
+  }>(`/phone/device-info/${encodeURIComponent(deviceId)}`),
+
+  // WiFi连接设备
+  connectWifi: (ip: string, port: number = 5555) => request<{ success: boolean; message: string }>('/phone/connect-wifi', {
+    method: 'POST',
+    body: JSON.stringify({ ip, port }),
+  }),
+
+  // 断开WiFi连接
+  disconnectWifi: (ip: string, port: number = 5555) => request<{ success: boolean; message: string }>('/phone/disconnect-wifi', {
+    method: 'POST',
+    body: JSON.stringify({ ip, port }),
+  }),
+
+  // 获取镜像状态
+  getMirrorStatus: () => request<{ status: {
+    running: boolean
+    recording: boolean
+    device_id: string | null
+  } }>('/phone/mirror/status'),
+
+  // 启动普通镜像（可以正常操作手机）
+  startMirror: (deviceId: string, maxSize: number = 1920, bitRate: string = '8M') => 
+    request<{ success: boolean; message: string; error?: string }>('/phone/mirror/start', {
+      method: 'POST',
+      body: JSON.stringify({ device_id: deviceId, max_size: maxSize, bit_rate: bitRate }),
+    }),
+
+  // 停止镜像
+  stopMirror: () => 
+    request<{ success: boolean; message: string; error?: string }>('/phone/mirror/stop', {
+      method: 'POST',
+    }),
+
+  // 启动坐标选择器
+  startCoordinatePicker: (deviceId: string, maxSize: number = 1920, bitRate: string = '8M') => 
+    request<{ success: boolean; message: string; error?: string }>('/phone/coordinate-picker/start', {
+      method: 'POST',
+      body: JSON.stringify({ device_id: deviceId, max_size: maxSize, bit_rate: bitRate }),
+    }),
+
+  // 停止坐标选择器
+  stopCoordinatePicker: () => 
+    request<{ success: boolean; message: string; error?: string }>('/phone/coordinate-picker/stop', {
+      method: 'POST',
+    }),
+
+  // 获取已选择的坐标
+  getPickedCoordinate: () =>
+    request<{ success: boolean; picked: boolean; x?: number; y?: number; error?: string }>('/phone/coordinate-picker/coordinate'),
+
+  // 测试坐标（在手机上执行点击）
+  testCoordinate: (x: number, y: number, deviceId?: string) =>
+    request<{ success: boolean; message: string; error?: string }>(`/phone/coordinate-picker/test?x=${x}&y=${y}${deviceId ? `&device_id=${deviceId}` : ''}`, {
+      method: 'POST',
+    }),
+
+  // 快速校准坐标映射
+  quickCalibrate: (windowX: number, windowY: number, actualPhoneX: number, actualPhoneY: number, windowWidth?: number, windowHeight?: number, phoneWidth?: number, phoneHeight?: number) =>
+    request<{ success: boolean; message?: string; calibration_data?: any; error?: string }>('/phone/coordinate-picker/quick-calibrate', {
+      method: 'POST',
+      body: JSON.stringify({
+        window_x: windowX,
+        window_y: windowY,
+        actual_phone_x: actualPhoneX,
+        actual_phone_y: actualPhoneY,
+        window_width: windowWidth,
+        window_height: windowHeight,
+        phone_width: phoneWidth,
+        phone_height: phoneHeight,
+      }),
+    }),
+
+  // 获取校准状态
+  getCalibrationStatus: () =>
+    request<{ success: boolean; is_calibrated: boolean; calibration_data?: any; error?: string }>('/phone/coordinate-picker/calibration-status'),
+
+  // 开始两次点击校准
+  startTwoClickCalibrate: () =>
+    request<{ success: boolean; message?: string; step?: number; instruction?: string; error?: string }>('/phone/coordinate-picker/start-two-click-calibrate', {
+      method: 'POST',
+    }),
+
+  // 取消校准
+  cancelCalibrate: () =>
+    request<{ success: boolean; message?: string; error?: string }>('/phone/coordinate-picker/cancel-calibrate', {
+      method: 'POST',
+    }),
+
+  // 获取校准步骤
+  getCalibrationStep: () =>
+    request<{ success: boolean; in_calibration: boolean; step?: number; first_coord?: [number, number]; instruction?: string; error?: string }>('/phone/coordinate-picker/calibration-step'),
+
+  // 启用/禁用触摸显示
+  setShowTouches: (enable: boolean, deviceId?: string) =>
+    request<{ success: boolean; message?: string; error?: string }>('/phone/settings/show-touches', {
+      method: 'POST',
+      body: JSON.stringify({ enable, device_id: deviceId }),
+    }),
+
+  // 启用/禁用指针位置
+  setPointerLocation: (enable: boolean, deviceId?: string) =>
+    request<{ success: boolean; message?: string; error?: string }>('/phone/settings/pointer-location', {
+      method: 'POST',
+      body: JSON.stringify({ enable, device_id: deviceId }),
+    }),
+
+  // 截取手机屏幕
+  screenshot: (deviceId: string) =>
+    request<{ success: boolean; path?: string; error?: string }>(`/phone/screenshot?device_id=${deviceId}`),
+
+  // 从手机截图中截取模板
+  captureTemplate: (deviceId: string, x: number, y: number, width: number, height: number, saveName?: string) =>
+    request<{ success: boolean; message?: string; asset?: any; error?: string }>('/phone/screenshot/capture-template', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        device_id: deviceId, 
+        x, 
+        y, 
+        width, 
+        height, 
+        save_name: saveName 
+      }),
+    }),
+}

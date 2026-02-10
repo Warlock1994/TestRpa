@@ -118,18 +118,25 @@ async def api_stop_picker():
 @router.get("/picker/selected")
 async def api_get_selected_element():
     """获取选中的单个元素"""
+    if not is_browser_open():
+        return {"selected": False, "element": None}
+    
     result = get_selected_element()
     if result.get("success"):
         data = result.get("data")
         if data:
             return {"selected": True, "element": data}
         return {"selected": False, "element": None}
-    raise HTTPException(status_code=400, detail=result.get("error", "获取失败"))
+    # 即使失败也返回 200，避免前端轮询时出现大量 400 错误
+    return {"selected": False, "element": None}
 
 
 @router.get("/picker/similar")
 async def api_get_similar_elements():
     """获取选中的相似元素"""
+    if not is_browser_open():
+        return {"selected": False, "similar": None}
+    
     result = get_similar_elements()
     if result.get("success"):
         data = result.get("data")
@@ -145,4 +152,5 @@ async def api_get_similar_elements():
                 }
             }
         return {"selected": False, "similar": None}
-    raise HTTPException(status_code=400, detail=result.get("error", "获取失败"))
+    # 即使失败也返回 200，避免前端轮询时出现大量 400 错误
+    return {"selected": False, "similar": None}

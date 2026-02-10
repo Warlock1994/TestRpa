@@ -60,6 +60,21 @@ export const gettingStartedContent = `# 🚀 快速入门：5分钟学会Web RPA
 
 🎉 恭喜！你已经完成了第一个自动化工作流！
 
+### 工作流程图
+
+\`\`\`mermaid
+%%{init: {'theme':'default', 'themeVariables': { 'fontSize':'18px'}}}%%
+graph LR
+    A["<b>打开网页</b><br/><br/>百度首页"] --> B["<b>输入文本</b><br/><br/>搜索框输入关键词"]
+    B --> C["<b>点击元素</b><br/><br/>点击搜索按钮"]
+    C --> D["<b>完成搜索</b>"]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    style D fill:#e8f5e9,stroke:#388e3c,stroke-width:3px,color:#000
+\`\`\`
+
 ---
 
 ## 📌 界面详细介绍

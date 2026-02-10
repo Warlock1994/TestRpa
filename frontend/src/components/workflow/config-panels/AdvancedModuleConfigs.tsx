@@ -11,6 +11,7 @@ import { CoordinateInput } from '@/components/ui/coordinate-input'
 import { DualCoordinateInput } from '@/components/ui/dual-coordinate-input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ImagePathInput } from '@/components/ui/image-path-input'
+import { getBackendUrl } from '@/services/api'
 
 type RenderSelectorInput = (id: string, label: string, placeholder: string) => React.ReactNode
 
@@ -1947,12 +1948,12 @@ function MacroRecordDialog({
   // 启动全局快捷键监听器（组件挂载时）
   useEffect(() => {
     // 启动后端全局快捷键监听
-    fetch('http://localhost:8000/api/system/macro/hotkey/start', { method: 'POST' })
+    fetch(`${getBackendUrl()}/api/system/macro/hotkey/start`, { method: 'POST' })
       .catch(console.error)
     
     // 组件卸载时停止监听
     return () => {
-      fetch('http://localhost:8000/api/system/macro/hotkey/stop', { method: 'POST' })
+      fetch(`${getBackendUrl()}/api/system/macro/hotkey/stop`, { method: 'POST' })
         .catch(console.error)
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current)
@@ -1964,7 +1965,7 @@ function MacroRecordDialog({
   useEffect(() => {
     const pollData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/system/macro/data')
+        const response = await fetch(`${getBackendUrl()}/api/system/macro/data`)
         const data = await response.json()
         if (data.success) {
           // 检查快捷键触发
@@ -2002,7 +2003,7 @@ function MacroRecordDialog({
 
     // 获取初始鼠标位置作为基准点
     try {
-      const response = await fetch('http://localhost:8000/api/system/mouse-position')
+      const response = await fetch(`${getBackendUrl()}/api/system/mouse-position`)
       const data = await response.json()
       if (data.success) {
         basePositionRef.current = { x: data.x, y: data.y }
@@ -2024,7 +2025,7 @@ function MacroRecordDialog({
   // 通过后端API开始录制
   const startMacroRecording = async () => {
     try {
-      await fetch('http://localhost:8000/api/system/macro/start', {
+      await fetch(`${getBackendUrl()}/api/system/macro/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2044,7 +2045,7 @@ function MacroRecordDialog({
   // 停止录制
   const stopMacroRecording = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/system/macro/stop', {
+      const response = await fetch(`${getBackendUrl()}/api/system/macro/stop`, {
         method: 'POST'
       })
       const data = await response.json()
@@ -2575,7 +2576,7 @@ function MacroActionEditDialog({
     setStatusText('Ctrl+左键 确认坐标 | Ctrl+右键 或 ESC 取消')
     
     try {
-      const response = await fetch('http://localhost:8000/api/system/pick-mouse-position', {
+      const response = await fetch(`${getBackendUrl()}/api/system/pick-mouse-position`, {
         method: 'POST',
       })
       
@@ -2806,7 +2807,7 @@ function MacroAddActionDialog({
     setStatusText('Ctrl+左键 确认坐标 | Ctrl+右键 或 ESC 取消')
     
     try {
-      const response = await fetch('http://localhost:8000/api/system/pick-mouse-position', {
+      const response = await fetch(`${getBackendUrl()}/api/system/pick-mouse-position`, {
         method: 'POST',
       })
       

@@ -42,6 +42,16 @@ from . import format_factory
 from . import python_script
 from . import table_extract
 from . import switch_tab
+# 手机自动化模块
+from . import phone_device
+from . import phone_touch
+from . import phone_input
+from . import phone_screen
+from . import phone_app
+from . import phone_file
+from . import phone_advanced
+from . import phone_vision
+from . import phone_settings
 
 # 调试：打印已注册的执行器
 print(f"[DEBUG] 已注册的执行器类型: {registry.get_all_types()}")

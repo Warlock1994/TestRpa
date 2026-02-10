@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getBackendBaseUrl } from '@/services/config'
 import type { ImageAsset } from '@/types'
 
 export function ImageAssetsPanel() {
@@ -401,7 +402,7 @@ export function ImageAssetsPanel() {
   // 渲染图片卡片（小预览图，与 Excel 卡片大小一致）
   const renderImageCard = (asset: ImageAsset) => {
     const isEditing = editingAsset === asset.id
-    const API_BASE = sessionStorage.getItem('backendBaseUrl') || 'http://localhost:1122'
+    const API_BASE = getBackendBaseUrl()
 
     return (
       <div
@@ -741,7 +742,7 @@ export function ImageAssetsPanel() {
               </svg>
             </button>
             <img
-              src={`${sessionStorage.getItem('backendBaseUrl') || 'http://localhost:1122'}/api/image-assets/${previewAsset.id}/file`}
+              src={`${getBackendBaseUrl()}/api/image-assets/${previewAsset.id}/file`}
               alt={previewAsset.originalName}
               className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
             />

@@ -14,6 +14,26 @@ export const dataProcessingContent = `# 📊 数据处理指南
 - 从盒子里取东西（引用）
 - 换掉盒子里的东西（修改）
 
+### 变量生命周期
+
+\`\`\`mermaid
+%%{init: {'theme':'default', 'themeVariables': { 'fontSize':'18px'}}}%%
+graph LR
+    A["<b>创建变量</b>"] --> B["<b>赋值/修改</b>"]
+    B --> C["<b>引用使用</b>"]
+    C --> D{"<b>需要修改?</b>"}
+    D -->|是| B
+    D -->|否| E["<b>工作流结束</b>"]
+    E --> F["<b>变量销毁</b>"]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style C fill:#e8f5e9,stroke:#388e3c,stroke-width:3px,color:#000
+    style D fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    style E fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    style F fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#000
+\`\`\`
+
 ### 变量类型
 
 Web RPA支持5种变量类型：

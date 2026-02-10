@@ -98,15 +98,16 @@ class OpenPageExecutor(ModuleExecutor):
                 if p is None:
                     return ModuleResult(success=False, error="Playwright未初始化")
                 
-                user_data_dir = context._user_data_dir
-                print(f"[OpenPage] user_data_dir={user_data_dir}")
-                
                 # 获取浏览器配置
                 browser_config = context.browser_config or {}
                 browser_type = browser_config.get('type', 'msedge')
                 executable_path = browser_config.get('executablePath', '')
                 fullscreen = browser_config.get('fullscreen', False)
                 launch_args_str = browser_config.get('launchArgs', '')
+                
+                # 获取用户数据目录（已在 workflow_executor 中设置，要么是用户自定义的，要么是默认的）
+                user_data_dir = context._user_data_dir
+                print(f"[OpenPage] user_data_dir={user_data_dir}")
                 
                 # 解析启动参数（每行一个参数）
                 if launch_args_str:
@@ -305,17 +306,26 @@ class OpenPageExecutor(ModuleExecutor):
                             is_first_launch = context.page is None
                             
                             if is_first_launch:
-                                # 第一次启动：关闭所有历史页面
+                                # 第一次启动：复用第一个现有页面，关闭其他页面（保留一个以避免浏览器上下文被关闭）
                                 existing_pages = context.browser_context.pages[:]
-                                for old_page in existing_pages:
-                                    try:
-                                        await old_page.close()
-                                    except:
-                                        pass
-                                print(f"[OpenPage] 第一次启动，已清理 {len(existing_pages)} 个历史页面")
-                            
-                            # 创建新页面（新标签页）
-                            context.page = await context.browser_context.new_page()
+                                if existing_pages:
+                                    # 复用第一个页面
+                                    context.page = existing_pages[0]
+                                    # 只关闭除第一个外的其他页面
+                                    for old_page in existing_pages[1:]:
+                                        try:
+                                            await old_page.close()
+                                        except:
+                                            pass
+                                    print(f"[OpenPage] 第一次启动，复用第一个页面，已清理 {len(existing_pages) - 1} 个其他历史页面")
+                                else:
+                                    # 如果没有现有页面，创建新页面
+                                    context.page = await context.browser_context.new_page()
+                                    print(f"[OpenPage] 第一次启动，创建新页面")
+                            else:
+                                # 非第一次启动：创建新标签页
+                                context.page = await context.browser_context.new_page()
+                                print(f"[OpenPage] 在现有浏览器中创建新标签页")
                             
                             # 注入篡改猴脚本
                             await inject_userscript_to_page(context.page)
@@ -330,10 +340,7 @@ class OpenPageExecutor(ModuleExecutor):
                                 new_page.on("load", lambda: asyncio.create_task(inject_on_navigation(new_page)))
                             context.browser_context.on("page", on_page)
                             
-                            if is_first_launch:
-                                print(f"[OpenPage] 持久化浏览器上下文启动成功")
-                            else:
-                                print(f"[OpenPage] 在现有浏览器中创建新标签页")
+                            print(f"[OpenPage] 持久化浏览器上下文准备完成")
                             break
                         except Exception as e:
                             last_error = e
@@ -348,6 +355,8 @@ class OpenPageExecutor(ModuleExecutor):
                                     pass
                                 context.browser_context = None
                             
+                            # 清理锁文件
+                            lock_file = user_data_path / "SingletonLock"
                             if lock_file.exists():
                                 try:
                                     lock_file.unlink()
@@ -355,9 +364,29 @@ class OpenPageExecutor(ModuleExecutor):
                                     pass
                             await asyncio.sleep(0.5)
                     else:
+                        # 所有重试都失败，返回详细错误信息
+                        error_msg = str(last_error)
+                        error_detail = "❌ 无法启动持久化浏览器"
+                        
+                        # 详细的错误分类
+                        if "user-data-dir" in error_msg.lower() or "already in use" in error_msg.lower():
+                            solution = f"\n\n原始错误: {error_msg}\n\n💡 解决方案:\n1. 关闭所有 {browser_type} 浏览器窗口（包括后台进程）\n2. 打开任务管理器，结束所有 {browser_type}.exe 进程\n3. 重启电脑后重试\n4. 或者在浏览器配置中使用自定义数据目录"
+                        
+                        elif "executable doesn't exist" in error_msg.lower() or "browser is not installed" in error_msg.lower():
+                            solution = f"\n\n原始错误: {error_msg}\n\n💡 解决方案:\n1. 运行命令安装浏览器驱动:\n   playwright install {browser_type}\n\n2. 或者安装所有浏览器:\n   playwright install\n\n3. 如果命令失败，请检查网络连接\n\n4. 或者切换到其他浏览器类型"
+                        
+                        elif "permission denied" in error_msg.lower() or "access denied" in error_msg.lower():
+                            solution = f"\n\n原始错误: {error_msg}\n\n💡 解决方案:\n1. 以管理员身份运行 WebRPA\n2. 检查数据目录的权限设置\n3. 确认杀毒软件没有阻止访问"
+                        
+                        elif "timeout" in error_msg.lower():
+                            solution = f"\n\n原始错误: {error_msg}\n\n💡 解决方案:\n1. 系统配置较低，浏览器启动较慢\n2. 关闭其他占用资源的程序\n3. 重启电脑后重试"
+                        
+                        else:
+                            solution = f"\n\n原始错误: {error_msg}\n\n💡 解决方案:\n1. 检查系统资源是否充足（内存、磁盘空间）\n2. 重启电脑后重试\n3. 更新 Playwright: pip install --upgrade playwright\n4. 重新安装浏览器驱动: playwright install\n5. 查看完整错误日志"
+                        
                         return ModuleResult(
                             success=False, 
-                            error=f"无法启动持久化浏览器: {last_error}"
+                            error=error_detail + solution
                         )
                 else:
                     print(f"[OpenPage] 使用普通模式启动浏览器")

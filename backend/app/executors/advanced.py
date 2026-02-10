@@ -1404,10 +1404,10 @@ class RealMouseScrollExecutor(ModuleExecutor):
                 inp.mi.mouseData = delta & 0xFFFFFFFF  # 转为无符号
                 inp.mi.dwFlags = MOUSEEVENTF_WHEEL
                 inp.mi.time = 0
-                inp.mi.dwExtraInfo = None
+                inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
                 
                 # 使用 SendInput 发送滚轮事件
-                ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                ctypes.windll.user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
                 
                 if i < scroll_count - 1 and scroll_interval > 0:
                     await asyncio.sleep(scroll_interval / 1000)
@@ -1729,8 +1729,8 @@ class RealMouseClickExecutor(ModuleExecutor):
                 inp.mi.mouseData = 0
                 inp.mi.dwFlags = event_flag
                 inp.mi.time = 0
-                inp.mi.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
 
             if click_type == "hold":
                 # 长按模式
@@ -1923,8 +1923,8 @@ class RealMouseDragExecutor(ModuleExecutor):
                 inp.mi.mouseData = 0
                 inp.mi.dwFlags = event_flag
                 inp.mi.time = 0
-                inp.mi.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
 
             # 1. 移动到起点
             user32.SetCursorPos(start_x, start_y)
@@ -2025,8 +2025,8 @@ class RealKeyboardExecutor(ModuleExecutor):
                 inp.union.ki.wScan = ctypes.windll.user32.MapVirtualKeyW(vk_code, 0)
                 inp.union.ki.dwFlags = 0
                 inp.union.ki.time = 0
-                inp.union.ki.dwExtraInfo = None
-                ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                ctypes.windll.user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
             
             def send_key_up(vk_code):
                 """发送按键释放事件"""
@@ -2036,8 +2036,8 @@ class RealKeyboardExecutor(ModuleExecutor):
                 inp.union.ki.wScan = ctypes.windll.user32.MapVirtualKeyW(vk_code, 0)
                 inp.union.ki.dwFlags = KEYEVENTF_KEYUP
                 inp.union.ki.time = 0
-                inp.union.ki.dwExtraInfo = None
-                ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                ctypes.windll.user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
             
             def send_unicode_char(char):
                 """发送 Unicode 字符"""
@@ -2048,8 +2048,8 @@ class RealKeyboardExecutor(ModuleExecutor):
                 inp_down.union.ki.wScan = ord(char)
                 inp_down.union.ki.dwFlags = KEYEVENTF_UNICODE
                 inp_down.union.ki.time = 0
-                inp_down.union.ki.dwExtraInfo = None
-                ctypes.windll.user32.SendInput(1, ctypes.byref(inp_down), ctypes.sizeof(INPUT))
+                inp_down.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                ctypes.windll.user32.SendInput(1, ctypes.pointer(inp_down), ctypes.sizeof(INPUT))
                 
                 # 释放
                 inp_up = INPUT()
@@ -2058,8 +2058,8 @@ class RealKeyboardExecutor(ModuleExecutor):
                 inp_up.union.ki.wScan = ord(char)
                 inp_up.union.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP
                 inp_up.union.ki.time = 0
-                inp_up.union.ki.dwExtraInfo = None
-                ctypes.windll.user32.SendInput(1, ctypes.byref(inp_up), ctypes.sizeof(INPUT))
+                inp_up.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                ctypes.windll.user32.SendInput(1, ctypes.pointer(inp_up), ctypes.sizeof(INPUT))
 
             if input_type == "text":
                 text = context.resolve_value(config.get("text", ""))
@@ -2413,8 +2413,8 @@ class ClickImageExecutor(ModuleExecutor):
                 inp.mi.mouseData = 0
                 inp.mi.dwFlags = event_flag
                 inp.mi.time = 0
-                inp.mi.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
 
             # 执行点击
             click_count = 2 if click_type == "double" else 1
@@ -3699,8 +3699,8 @@ class MacroRecorderExecutor(ModuleExecutor):
                 inp.union.ki.wScan = user32.MapVirtualKeyW(vk_code, 0)
                 inp.union.ki.dwFlags = KEYEVENTF_KEYUP if is_up else 0
                 inp.union.ki.time = 0
-                inp.union.ki.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
             
             def send_unicode_char(char):
                 # 按下
@@ -3710,8 +3710,8 @@ class MacroRecorderExecutor(ModuleExecutor):
                 inp_down.union.ki.wScan = ord(char)
                 inp_down.union.ki.dwFlags = KEYEVENTF_UNICODE
                 inp_down.union.ki.time = 0
-                inp_down.union.ki.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp_down), ctypes.sizeof(INPUT))
+                inp_down.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp_down), ctypes.sizeof(INPUT))
                 # 释放
                 inp_up = INPUT()
                 inp_up.type = INPUT_KEYBOARD
@@ -3719,8 +3719,8 @@ class MacroRecorderExecutor(ModuleExecutor):
                 inp_up.union.ki.wScan = ord(char)
                 inp_up.union.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP
                 inp_up.union.ki.time = 0
-                inp_up.union.ki.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp_up), ctypes.sizeof(INPUT))
+                inp_up.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp_up), ctypes.sizeof(INPUT))
 
             # 如果使用相对位置，获取当前鼠标位置作为基准
             if use_relative_position:

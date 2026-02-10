@@ -63,12 +63,14 @@ async def trigger_webhook(webhook_id: str, request: Request):
 @router.get("/webhooks")
 async def list_webhooks():
     """获取所有已注册的Webhook"""
+    from app.utils.config import get_backend_url
+    
     webhooks = []
     for webhook_id, data in trigger_manager.webhooks.items():
         webhooks.append({
             'webhookId': webhook_id,
             'method': data['method'],
-            'url': f"http://localhost:8000/api/triggers/webhook/{webhook_id}"
+            'url': f"{get_backend_url()}/api/triggers/webhook/{webhook_id}"
         })
     return {"webhooks": webhooks}
 

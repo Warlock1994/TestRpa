@@ -12,6 +12,7 @@ import { AutoBrowserDialog } from './AutoBrowserDialog'
 import { WorkflowHubDialog } from './WorkflowHubDialog'
 import { LocalWorkflowDialog } from './LocalWorkflowDialog'
 import { ScheduledTasksDialog } from '../scheduled-tasks/ScheduledTasksDialog'
+import { PhoneMirrorDialog } from './PhoneMirrorDialog'
 import {
   Play,
   Square,
@@ -24,6 +25,7 @@ import {
   Code,
   Clock,
   EyeOff,
+  Smartphone,
 } from 'lucide-react'
 import { useState, useEffect, useCallback, useRef } from 'react'
 
@@ -35,6 +37,7 @@ export function Toolbar() {
   const [showWorkflowHub, setShowWorkflowHub] = useState(false)
   const [showLocalWorkflow, setShowLocalWorkflow] = useState(false)
   const [showScheduledTasks, setShowScheduledTasks] = useState(false)
+  const [showPhoneMirror, setShowPhoneMirror] = useState(false)
   const [defaultFolder, setDefaultFolder] = useState('')
   const { confirm, ConfirmDialog } = useConfirm()
   
@@ -629,6 +632,16 @@ export function Toolbar() {
         <Button 
           variant="outline" 
           size="sm" 
+          className="bg-white/90 border-white/50 text-emerald-700 hover:bg-white hover:text-emerald-800
+            transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" 
+          onClick={() => setShowPhoneMirror(true)}
+        >
+          <Smartphone className="w-4 h-4 mr-1" />
+          手机镜像
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
           className="bg-white/90 border-white/50 text-purple-700 hover:bg-white hover:text-purple-800
             transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" 
           onClick={() => setShowWorkflowHub(true)}
@@ -709,6 +722,12 @@ export function Toolbar() {
       <ScheduledTasksDialog
         open={showScheduledTasks}
         onClose={() => setShowScheduledTasks(false)}
+      />
+      
+      {/* 手机镜像对话框 */}
+      <PhoneMirrorDialog
+        open={showPhoneMirror}
+        onClose={() => setShowPhoneMirror(false)}
       />
       
       {/* 确认对话框 */}

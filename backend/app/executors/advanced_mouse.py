@@ -62,10 +62,10 @@ class RealMouseScrollExecutor(ModuleExecutor):
                 inp.mi.mouseData = delta & 0xFFFFFFFF  # 转为无符号
                 inp.mi.dwFlags = MOUSEEVENTF_WHEEL
                 inp.mi.time = 0
-                inp.mi.dwExtraInfo = None
+                inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
                 
                 # 使用 SendInput 发送滚轮事件
-                ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                ctypes.windll.user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
                 
                 if i < scroll_count - 1 and scroll_interval > 0:
                     await asyncio.sleep(scroll_interval / 1000)
@@ -171,8 +171,8 @@ class RealMouseClickExecutor(ModuleExecutor):
                 inp.mi.mouseData = 0
                 inp.mi.dwFlags = event_flag
                 inp.mi.time = 0
-                inp.mi.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
 
             if click_type == "hold":
                 # 长按模式
@@ -363,8 +363,8 @@ class RealMouseDragExecutor(ModuleExecutor):
                 inp.mi.mouseData = 0
                 inp.mi.dwFlags = event_flag
                 inp.mi.time = 0
-                inp.mi.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
 
             # 1. 移动到起点
             user32.SetCursorPos(start_x, start_y)

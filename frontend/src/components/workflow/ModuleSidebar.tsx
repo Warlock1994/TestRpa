@@ -120,6 +120,7 @@ import {
   ImagePlus,
   Subtitles,
   Volume,
+  Volume2,
   Maximize2,
   Users,
   User,
@@ -154,6 +155,7 @@ import {
   Fingerprint,
   Printer,
   FlipHorizontal,
+  Play,
 } from 'lucide-react'
 
 // 收藏模块现在统一由 moduleStatsStore 管理，不再使用单独的 localStorage
@@ -288,6 +290,26 @@ const moduleIcons: Record<ModuleType, React.ElementType> = {
   // 微信自动化
   wechat_send_message: MessageSquare,
   wechat_send_file: FileUp,
+  // 手机自动化
+  phone_tap: MousePointerClick,
+  phone_swipe: Move,
+  phone_long_press: MousePointer2,
+  phone_input_text: Type,
+  phone_press_key: Keyboard,
+  phone_screenshot: Camera,
+  phone_start_mirror: ScreenShare,
+  phone_stop_mirror: ScreenShareOff,
+  phone_install_app: Download,
+  phone_start_app: Play,
+  phone_stop_app: StopCircle,
+  phone_uninstall_app: Trash2,
+  phone_push_file: Upload,
+  phone_pull_file: Download,
+  phone_click_image: Image,
+  phone_click_text: Type,
+  phone_wait_image: Clock,
+  phone_set_volume: Volume2,
+  phone_set_brightness: Sun,
   // 用户交互
   input_prompt: TextCursorInput,
   // 系统操作
@@ -587,6 +609,26 @@ const moduleKeywords: Record<ModuleType, string[]> = {
   // 微信自动化
   wechat_send_message: ['微信', '发送', '消息', 'wechat', 'weixin', 'message', 'send', '聊天'],
   wechat_send_file: ['微信', '发送', '文件', '图片', 'wechat', 'weixin', 'file', 'image', 'send', '上传'],
+  // 手机自动化
+  phone_tap: ['手机', '点击', '触摸', 'phone', 'tap', 'click', 'touch', '坐标'],
+  phone_swipe: ['手机', '滑动', '滑屏', 'phone', 'swipe', 'slide', '手势'],
+  phone_long_press: ['手机', '长按', '按住', 'phone', 'long', 'press', 'hold'],
+  phone_input_text: ['手机', '输入', '文本', 'phone', 'input', 'text', 'type', '打字'],
+  phone_press_key: ['手机', '按键', '物理键', 'phone', 'key', 'button', 'home', 'back'],
+  phone_screenshot: ['手机', '截图', '截屏', 'phone', 'screenshot', 'capture', '屏幕'],
+  phone_start_mirror: ['手机', '镜像', '投屏', 'phone', 'mirror', 'screen', 'scrcpy', '屏幕共享'],
+  phone_stop_mirror: ['手机', '停止', '镜像', 'phone', 'stop', 'mirror', '关闭'],
+  phone_install_app: ['手机', '安装', '应用', 'phone', 'install', 'app', 'apk'],
+  phone_start_app: ['手机', '启动', '应用', 'phone', 'start', 'app', '打开'],
+  phone_stop_app: ['手机', '停止', '应用', 'phone', 'stop', 'app', '关闭', '强制停止'],
+  phone_uninstall_app: ['手机', '卸载', '应用', 'phone', 'uninstall', 'app', '删除'],
+  phone_push_file: ['手机', '推送', '文件', '上传', 'phone', 'push', 'file', 'upload'],
+  phone_pull_file: ['手机', '拉取', '文件', '下载', 'phone', 'pull', 'file', 'download'],
+  phone_click_image: ['手机', '点击', '图像', '图片', 'phone', 'click', 'image', '识别', '视觉'],
+  phone_click_text: ['手机', '点击', '文本', '文字', 'phone', 'click', 'text', 'ocr', '识别'],
+  phone_wait_image: ['手机', '等待', '图像', '图片', 'phone', 'wait', 'image', '识别', '出现'],
+  phone_set_volume: ['手机', '设置', '音量', '声音', 'phone', 'volume', 'sound', '调节'],
+  phone_set_brightness: ['手机', '设置', '亮度', '屏幕', 'phone', 'brightness', 'screen', '调节'],
   select_dropdown: ['下拉', '选择', 'select', 'dropdown'],
   set_checkbox: ['复选框', '勾选', 'checkbox', '选中'],
   drag_element: ['拖拽', '拖动', 'drag', '移动'],
@@ -859,7 +901,7 @@ const moduleCategories = [
   {
     name: '🎨 图像工具',
     color: 'bg-fuchsia-600',
-    modules: ['add_watermark', 'image_get_info', 'qr_generate', 'qr_decode'] as ModuleType[],
+    modules: ['add_watermark', 'image_get_info', 'image_convert_format', 'qr_generate', 'qr_decode'] as ModuleType[],
   },
   // ===== AI能力 =====
   {
@@ -892,6 +934,11 @@ const moduleCategories = [
     name: '💚 微信机器人',
     color: 'bg-green-500',
     modules: ['wechat_send_message', 'wechat_send_file'] as ModuleType[],
+  },
+  {
+    name: '📱 手机自动化',
+    color: 'bg-cyan-600',
+    modules: ['phone_tap', 'phone_swipe', 'phone_long_press', 'phone_input_text', 'phone_press_key', 'phone_screenshot', 'phone_start_mirror', 'phone_stop_mirror', 'phone_install_app', 'phone_start_app', 'phone_stop_app', 'phone_uninstall_app', 'phone_push_file', 'phone_pull_file', 'phone_click_image', 'phone_click_text', 'phone_wait_image', 'phone_set_volume', 'phone_set_brightness'] as ModuleType[],
   },
   {
     name: '🔗 网络共享',

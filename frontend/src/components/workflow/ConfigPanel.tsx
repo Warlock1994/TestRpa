@@ -200,6 +200,27 @@ import {
   WeChatSendFileConfig,
 } from './config-panels/WeChatModuleConfigs'
 import {
+  PhoneTapConfig,
+  PhoneSwipeConfig,
+  PhoneLongPressConfig,
+  PhoneInputTextConfig,
+  PhonePressKeyConfig,
+  PhoneScreenshotConfig,
+  PhoneStartMirrorConfig,
+  PhoneStopMirrorConfig,
+  PhoneInstallAppConfig,
+  PhoneStartAppConfig,
+  PhoneStopAppConfig,
+  PhoneUninstallAppConfig,
+  PhonePushFileConfig,
+  PhonePullFileConfig,
+  PhoneClickImageConfig,
+  PhoneClickTextConfig,
+  PhoneWaitImageConfig,
+  PhoneSetVolumeConfig,
+  PhoneSetBrightnessConfig,
+} from './config-panels/PhoneModuleConfigs'
+import {
   PDFToImagesConfig,
   ImagesToPDFConfig,
   PDFMergeConfig,
@@ -921,6 +942,45 @@ export function ConfigPanel({ selectedNodeId: propSelectedNodeId }: ConfigPanelP
         return <WeChatSendMessageConfig data={nodeData} onChange={handleChange} />
       case 'wechat_send_file':
         return <WeChatSendFileConfig data={nodeData} onChange={handleChange} />
+      // 手机自动化模块
+      case 'phone_tap':
+        return <PhoneTapConfig data={nodeData} onChange={handleChange} />
+      case 'phone_swipe':
+        return <PhoneSwipeConfig data={nodeData} onChange={handleChange} />
+      case 'phone_long_press':
+        return <PhoneLongPressConfig data={nodeData} onChange={handleChange} />
+      case 'phone_input_text':
+        return <PhoneInputTextConfig data={nodeData} onChange={handleChange} />
+      case 'phone_press_key':
+        return <PhonePressKeyConfig data={nodeData} onChange={handleChange} />
+      case 'phone_screenshot':
+        return <PhoneScreenshotConfig data={nodeData} onChange={handleChange} />
+      case 'phone_start_mirror':
+        return <PhoneStartMirrorConfig data={nodeData} onChange={handleChange} />
+      case 'phone_stop_mirror':
+        return <PhoneStopMirrorConfig />
+      case 'phone_install_app':
+        return <PhoneInstallAppConfig data={nodeData} onChange={handleChange} />
+      case 'phone_start_app':
+        return <PhoneStartAppConfig data={nodeData} onChange={handleChange} />
+      case 'phone_stop_app':
+        return <PhoneStopAppConfig data={nodeData} onChange={handleChange} />
+      case 'phone_uninstall_app':
+        return <PhoneUninstallAppConfig data={nodeData} onChange={handleChange} />
+      case 'phone_push_file':
+        return <PhonePushFileConfig data={nodeData} onChange={handleChange} />
+      case 'phone_pull_file':
+        return <PhonePullFileConfig data={nodeData} onChange={handleChange} />
+      case 'phone_click_image':
+        return <PhoneClickImageConfig data={nodeData} onChange={handleChange} />
+      case 'phone_click_text':
+        return <PhoneClickTextConfig data={nodeData} onChange={handleChange} />
+      case 'phone_wait_image':
+        return <PhoneWaitImageConfig data={nodeData} onChange={handleChange} />
+      case 'phone_set_volume':
+        return <PhoneSetVolumeConfig data={nodeData} onChange={handleChange} />
+      case 'phone_set_brightness':
+        return <PhoneSetBrightnessConfig data={nodeData} onChange={handleChange} />
       // PDF处理模块
       case 'pdf_to_images':
         return <PDFToImagesConfig config={nodeData} updateConfig={handleChange} />

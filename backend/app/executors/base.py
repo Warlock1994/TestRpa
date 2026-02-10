@@ -66,6 +66,9 @@ class ExecutionContext:
     browser_config: Optional[dict] = None  # 浏览器配置 {type, executablePath}
     _lock: asyncio.Lock = field(default_factory=asyncio.Lock)  # 异步锁
     
+    # 手机设备ID（用于手机自动化）
+    phone_device_id: Optional[str] = None
+    
     # iframe 状态跟踪
     _in_iframe: bool = False  # 是否在iframe中
     _main_page: Optional[Page] = None  # 主页面引用（用于从iframe切换回来）
@@ -179,6 +182,11 @@ class ExecutionContext:
         }
         self._logs.append(log_entry)
     
+    def log(self, message: str, level: str = "info"):
+        """简单的日志方法（用于模块内部日志）"""
+        print(f"[{level.upper()}] {message}")
+        self.add_log(level, message)
+    
     def get_logs(self) -> list[dict[str, Any]]:
         """获取所有日志"""
         return self._logs.copy()
@@ -190,7 +198,9 @@ class ExecutionContext:
     async def switch_to_latest_page(self) -> bool:
         """切换到最新的页面（处理新标签页打开的情况）
         
-        注意：如果当前在iframe中，会刷新iframe引用而不是切换页面
+        注意：
+        - 如果当前在iframe中，会刷新iframe引用而不是切换页面
+        - 保持当前页面不变，除非当前页面已关闭
         
         Returns:
             bool: 是否切换了页面
@@ -209,16 +219,21 @@ class ExecutionContext:
             if not pages:
                 return False
             
-            # 获取最新的页面（最后一个）
-            latest_page = pages[-1]
-            
-            # 如果最新页面不是当前页面，切换过去
-            if self.page != latest_page:
-                self.page = latest_page
+            # 如果当前没有页面，使用最后一个
+            if self.page is None:
+                self.page = pages[-1]
                 return True
             
+            # 检查当前页面是否还在页面列表中
+            if self.page not in pages:
+                # 当前页面已关闭，切换到最后一个页面
+                self.page = pages[-1]
+                return True
+            
+            # 当前页面仍然有效，保持不变
             return False
-        except Exception:
+        except Exception as e:
+            print(f"[ExecutionContext] switch_to_latest_page 失败: {e}")
             return False
     
     def get_variable(self, name: str, default: Any = None) -> Any:

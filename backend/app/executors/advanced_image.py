@@ -216,8 +216,8 @@ class ClickImageExecutor(ModuleExecutor):
                 inp.mi.mouseData = 0
                 inp.mi.dwFlags = event_flag
                 inp.mi.time = 0
-                inp.mi.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
 
             # 使用 SetCursorPos 移动鼠标（更精确）
             user32.SetCursorPos(int(click_x), int(click_y))

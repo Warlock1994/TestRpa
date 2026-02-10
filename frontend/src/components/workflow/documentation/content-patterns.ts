@@ -26,10 +26,20 @@ export const workflowPatternsContent = `# 🔄 工作流模式
 
 根据条件执行不同的分支。
 
-\`\`\`
-        ┌─ 条件为真 → 分支A
-条件判断 ─┤
-        └─ 条件为假 → 分支B
+\`\`\`mermaid
+%%{init: {'theme':'default', 'themeVariables': { 'fontSize':'18px'}}}%%
+graph TD
+    A["<b>开始</b>"] --> B{"<b>条件判断</b>"}
+    B -->|条件为真| C["<b>分支A</b>"]
+    B -->|条件为假| D["<b>分支B</b>"]
+    C --> E["<b>继续执行</b>"]
+    D --> E
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style C fill:#e1f5fe,stroke:#0277bd,stroke-width:3px,color:#000
+    style D fill:#fce4ec,stroke:#c2185b,stroke-width:3px,color:#000
+    style E fill:#e8f5e9,stroke:#388e3c,stroke-width:3px,color:#000
 \`\`\`
 
 **适用场景**：
@@ -49,16 +59,18 @@ export const workflowPatternsContent = `# 🔄 工作流模式
 
 重复执行一段流程。
 
-\`\`\`
-┌─────────────────┐
-│  循环开始       │
-│    ↓           │
-│  执行操作      │←─┐
-│    ↓           │  │
-│  条件判断 ─────┼──┘
-│    ↓ (退出)    │
-│  循环结束      │
-└─────────────────┘
+\`\`\`mermaid
+%%{init: {'theme':'default', 'themeVariables': { 'fontSize':'18px'}}}%%
+graph TD
+    A["<b>循环开始</b>"] --> B["<b>执行操作</b>"]
+    B --> C{"<b>继续循环?</b>"}
+    C -->|是| B
+    C -->|否| D["<b>循环结束</b>"]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    style D fill:#e8f5e9,stroke:#388e3c,stroke-width:3px,color:#000
 \`\`\`
 
 **类型**：

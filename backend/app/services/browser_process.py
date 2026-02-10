@@ -480,7 +480,31 @@ async def main():
                 )
             except Exception as e:
                 error_msg = str(e)
-                print(json.dumps({"status": "error", "error": f"浏览器启动失败: {error_msg}"}), flush=True)
+                
+                # 详细的错误分类和解决方案
+                detailed_error = f"浏览器启动失败: {error_msg}"
+                solution = ""
+                
+                # 检查是否是可执行文件不存在
+                if "executable doesn't exist" in error_msg.lower() or "cannot find" in error_msg.lower():
+                    detailed_error = f"❌ 浏览器可执行文件不存在\n路径: {executable_path}\n原始错误: {error_msg}"
+                    solution = "\n\n💡 解决方案:\n1. 检查浏览器路径是否正确\n2. 确认该路径下的浏览器可执行文件存在\n3. 尝试使用默认浏览器（不指定自定义路径）"
+                
+                # 检查是否是权限问题
+                elif "permission denied" in error_msg.lower() or "access denied" in error_msg.lower():
+                    detailed_error = f"❌ 权限不足，无法启动浏览器\n路径: {executable_path}\n原始错误: {error_msg}"
+                    solution = "\n\n💡 解决方案:\n1. 以管理员身份运行 WebRPA\n2. 检查浏览器文件的权限设置\n3. 确认杀毒软件没有阻止浏览器启动"
+                
+                # 检查是否是浏览器版本不兼容
+                elif "browser version" in error_msg.lower() or "incompatible" in error_msg.lower():
+                    detailed_error = f"❌ 浏览器版本不兼容\n原始错误: {error_msg}"
+                    solution = "\n\n💡 解决方案:\n1. 更新浏览器到最新版本\n2. 或者更新 Playwright: pip install --upgrade playwright\n3. 重新安装浏览器驱动: playwright install"
+                
+                # 其他错误
+                else:
+                    solution = "\n\n💡 解决方案:\n1. 检查浏览器路径是否正确\n2. 尝试使用默认浏览器（不指定自定义路径）\n3. 重启电脑后重试"
+                
+                print(json.dumps({"status": "error", "error": detailed_error + solution}), flush=True)
                 await playwright.stop()
                 return
         else:
@@ -501,36 +525,98 @@ async def main():
                 context = await browser_engine.launch_persistent_context(**launch_args)
             except Exception as e:
                 error_msg = str(e)
+                
+                # 详细的错误分类和解决方案
+                detailed_error = ""
+                solution = ""
+                should_retry = False
+                
                 # 检查是否是数据目录被占用
                 if "user-data-dir" in error_msg.lower() or "already in use" in error_msg.lower() or "Target page, context or browser has been closed" in error_msg:
-                    print(json.dumps({"status": "error", "error": "浏览器数据目录被占用，请关闭其他使用该目录的浏览器窗口"}), flush=True)
+                    detailed_error = f"❌ 浏览器数据目录被占用\n目录: {user_data_dir}\n原始错误: {error_msg}"
+                    solution = "\n\n💡 解决方案:\n1. 关闭所有 {browser_type} 浏览器窗口（包括后台进程）\n2. 打开任务管理器，结束所有 {browser_type}.exe 进程\n3. 如果问题仍然存在，重启电脑\n4. 或者在浏览器配置中使用自定义数据目录"
+                    solution = solution.replace("{browser_type}", browser_type)
+                    print(json.dumps({"status": "error", "error": detailed_error + solution}), flush=True)
                     await playwright.stop()
                     return
                 
-                # 如果使用用户数据目录失败，尝试使用临时目录
-                print(json.dumps({"warning": f"无法使用共享数据目录: {error_msg}，尝试使用临时目录"}), flush=True)
-                try:
-                    import tempfile
-                    temp_dir = tempfile.mkdtemp(prefix=f"browser_data_{browser_type}_")
-                    launch_args['user_data_dir'] = temp_dir
-                    context = await browser_engine.launch_persistent_context(**launch_args)
-                except Exception as e2:
-                    print(json.dumps({"status": "error", "error": f"浏览器启动失败: {str(e2)}"}), flush=True)
+                # 检查是否是浏览器驱动未安装
+                elif "executable doesn't exist" in error_msg.lower() or "browser is not installed" in error_msg.lower():
+                    detailed_error = f"❌ {browser_type} 浏览器驱动未安装\n原始错误: {error_msg}"
+                    solution = f"\n\n💡 解决方案:\n1. 运行命令安装浏览器驱动:\n   playwright install {browser_type}\n\n2. 或者安装所有浏览器:\n   playwright install\n\n3. 如果上述命令失败，请检查网络连接\n\n4. 或者切换到其他浏览器类型（在浏览器配置中修改）"
+                    print(json.dumps({"status": "error", "error": detailed_error + solution}), flush=True)
                     await playwright.stop()
                     return
+                
+                # 检查是否是权限问题
+                elif "permission denied" in error_msg.lower() or "access denied" in error_msg.lower():
+                    detailed_error = f"❌ 权限不足，无法访问浏览器数据目录\n目录: {user_data_dir}\n原始错误: {error_msg}"
+                    solution = "\n\n💡 解决方案:\n1. 以管理员身份运行 WebRPA\n2. 检查数据目录的权限设置\n3. 确认杀毒软件没有阻止访问\n4. 尝试使用其他数据目录"
+                    print(json.dumps({"status": "error", "error": detailed_error + solution}), flush=True)
+                    await playwright.stop()
+                    return
+                
+                # 检查是否是端口被占用
+                elif "address already in use" in error_msg.lower() or "port" in error_msg.lower():
+                    detailed_error = f"❌ 调试端口被占用\n原始错误: {error_msg}"
+                    solution = "\n\n💡 解决方案:\n1. 关闭其他正在运行的浏览器自动化程序\n2. 重启电脑释放端口\n3. 检查是否有其他 Playwright/Selenium 程序在运行"
+                    print(json.dumps({"status": "error", "error": detailed_error + solution}), flush=True)
+                    await playwright.stop()
+                    return
+                
+                # 其他未知错误，尝试使用临时目录
+                else:
+                    should_retry = True
+                    detailed_error = f"⚠️ 无法使用共享数据目录，尝试使用临时目录\n原始错误: {error_msg}"
+                
+                # 如果使用用户数据目录失败，尝试使用临时目录
+                if should_retry:
+                    print(json.dumps({"warning": detailed_error}), flush=True)
+                    try:
+                        import tempfile
+                        temp_dir = tempfile.mkdtemp(prefix=f"browser_data_{browser_type}_")
+                        launch_args['user_data_dir'] = temp_dir
+                        print(f"[BrowserProcess] 使用临时目录: {temp_dir}", file=sys.stderr)
+                        context = await browser_engine.launch_persistent_context(**launch_args)
+                        print(json.dumps({"warning": "⚠️ 注意：使用临时目录，浏览器登录状态不会保存"}), flush=True)
+                    except Exception as e2:
+                        error_msg2 = str(e2)
+                        
+                        # 临时目录也失败，给出详细错误
+                        if "executable doesn't exist" in error_msg2.lower() or "browser is not installed" in error_msg2.lower():
+                            detailed_error = f"❌ {browser_type} 浏览器驱动未安装\n原始错误: {error_msg2}"
+                            solution = f"\n\n💡 解决方案:\n1. 运行命令安装浏览器驱动:\n   playwright install {browser_type}\n\n2. 或者安装所有浏览器:\n   playwright install\n\n3. 如果上述命令失败，请检查网络连接\n\n4. 或者切换到其他浏览器类型（在浏览器配置中修改）"
+                        else:
+                            detailed_error = f"❌ 浏览器启动失败（已尝试临时目录）\n原始错误: {error_msg2}"
+                            solution = "\n\n💡 解决方案:\n1. 检查系统资源是否充足（内存、磁盘空间）\n2. 重启电脑后重试\n3. 更新 Playwright: pip install --upgrade playwright\n4. 重新安装浏览器驱动: playwright install\n5. 查看完整错误日志以获取更多信息"
+                        
+                        print(json.dumps({"status": "error", "error": detailed_error + solution}), flush=True)
+                        await playwright.stop()
+                        return
         
         # 获取或创建页面
         if context.pages:
-            # 使用已有的页面
+            # 关闭所有旧的标签页，只保留一个干净的
+            print(f"[BrowserProcess] 发现 {len(context.pages)} 个已有标签页，正在清理...", file=sys.stderr)
+            
+            # 保留第一个页面，关闭其他所有页面
             page = context.pages[0]
-            # 导航到空白页清除之前的内容
+            for old_page in context.pages[1:]:
+                try:
+                    await old_page.close()
+                except:
+                    pass
+            
+            # 将第一个页面导航到空白页
             try:
                 await page.goto('about:blank', timeout=5000)
+                print(f"[BrowserProcess] 已清理所有旧标签页，浏览器已就绪", file=sys.stderr)
             except:
                 pass
         else:
             # 没有页面时创建新页面
             page = await context.new_page()
+            print(f"[BrowserProcess] 创建新标签页", file=sys.stderr)
         
         # 注入篡改猴脚本到所有页面
         async def inject_userscript(pg):
@@ -600,6 +686,38 @@ async def main():
             pass
         
         print(json.dumps({"status": "browser_opened"}), flush=True)
+        
+        # 全局选择器激活标志
+        picker_active = False
+        
+        # 自动注入选择器到新页面的函数
+        async def auto_inject_picker(pg):
+            """如果选择器处于激活状态，自动注入到新页面"""
+            nonlocal picker_active
+            if picker_active:
+                try:
+                    await pg.wait_for_load_state('domcontentloaded', timeout=5000)
+                except:
+                    pass
+                try:
+                    await pg.evaluate(PICKER_SCRIPT)
+                    print(f"[BrowserProcess] 选择器已自动注入到新页面", file=sys.stderr)
+                except Exception as e:
+                    print(f"[BrowserProcess] 自动注入选择器失败: {e}", file=sys.stderr)
+        
+        # 为所有现有页面添加加载监听器
+        for pg in context.pages:
+            pg.on("load", lambda p=pg: asyncio.create_task(auto_inject_picker(p)))
+        
+        # 监听新页面创建，自动添加加载监听器
+        def on_new_page(new_pg):
+            # 为新页面添加加载监听器
+            new_pg.on("load", lambda: asyncio.create_task(auto_inject_picker(new_pg)))
+            # 如果选择器已激活，立即注入
+            if picker_active:
+                asyncio.create_task(auto_inject_picker(new_pg))
+        
+        context.on("page", on_new_page)
         
         # 处理命令
         while True:
@@ -686,17 +804,28 @@ async def main():
                         await page.wait_for_load_state('domcontentloaded', timeout=5000)
                     except: pass
                     await page.evaluate(PICKER_SCRIPT)
+                    picker_active = True  # 设置全局标志
+                    print(f"[BrowserProcess] 选择器已启动，将自动应用到所有页面", file=sys.stderr)
                     result["data"] = {"message": "选择器已启动"}
                 elif action == 'stop_picker':
-                    try:
-                        await page.evaluate("""() => {
-                            var tip = document.getElementById('__picker_tip');
-                            var box = document.getElementById('__picker_box');
-                            if (tip) tip.remove();
-                            if (box) box.remove();
-                            window.__elementPickerActive = false;
-                        }""")
-                    except: pass
+                    picker_active = False  # 清除全局标志
+                    # 在所有页面上停止选择器
+                    for pg in context.pages:
+                        try:
+                            await pg.evaluate("""() => {
+                                var tip = document.getElementById('__picker_tip');
+                                var box = document.getElementById('__picker_box');
+                                var firstBox = document.getElementById('__picker_first');
+                                var style = document.getElementById('__picker_style');
+                                if (tip) tip.remove();
+                                if (box) box.remove();
+                                if (firstBox) firstBox.remove();
+                                if (style) style.remove();
+                                document.querySelectorAll('.__picker_highlight').forEach(function(h) { h.remove(); });
+                                window.__elementPickerActive = false;
+                            }""")
+                        except: pass
+                    print(f"[BrowserProcess] 选择器已停止", file=sys.stderr)
                     result["data"] = {"message": "选择器已停止"}
                 elif action == 'get_selected':
                     data = await page.evaluate("""() => {

@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { socketService } from '@/services/socket'
 import { X, List, Hash, Type, Lock, AlignLeft, File, Folder, CheckSquare, SlidersHorizontal, ListChecks } from 'lucide-react'
+import { getBackendUrl } from '@/services/api'
 
 interface PromptData {
   requestId: string
@@ -137,7 +138,7 @@ export function InputPromptDialog() {
   // 选择文件
   const handleSelectFile = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/system/select-file', {
+      const response = await fetch(`${getBackendUrl()}/api/system/select-file`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: promptData?.title || '选择文件' })
@@ -156,7 +157,7 @@ export function InputPromptDialog() {
   // 选择文件夹
   const handleSelectFolder = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/system/select-folder', {
+      const response = await fetch(`${getBackendUrl()}/api/system/select-folder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: promptData?.title || '选择文件夹' })

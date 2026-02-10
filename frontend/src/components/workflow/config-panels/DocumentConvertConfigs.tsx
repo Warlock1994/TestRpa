@@ -5,6 +5,7 @@ import { VariableNameInput } from '@/components/ui/variable-name-input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FolderOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getBackendUrl } from '@/services/api'
 
 interface ConfigProps {
   config: Record<string, unknown>
@@ -22,7 +23,7 @@ const selectFile = async (updateConfig: (key: string, value: unknown) => void, k
       }
     }
     
-    const response = await fetch('http://localhost:8000/api/system/select-file', {
+    const response = await fetch(`${getBackendUrl()}/api/system/select-file`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: '选择文件', fileTypes })

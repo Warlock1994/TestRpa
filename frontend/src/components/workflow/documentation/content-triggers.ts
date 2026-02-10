@@ -4,6 +4,43 @@ export const triggersGuideContent = `# ⚡ 触发器使用指南
 
 触发器模块允许工作流在特定条件满足时自动执行，实现真正的自动化。WebRPA提供了10种强大的触发器，覆盖各种自动化场景。
 
+### 触发器工作流程
+
+\`\`\`mermaid
+%%{init: {'theme':'default', 'themeVariables': { 'fontSize':'16px'}}}%%
+graph TD
+    A["<b>工作流启动</b>"] --> B{"<b>触发器类型</b>"}
+    B -->|Webhook| C["等待HTTP请求"]
+    B -->|热键| D["监听键盘组合键"]
+    B -->|文件监控| E["监控文件变化"]
+    B -->|邮件| F["检查新邮件"]
+    B -->|API| G["轮询API接口"]
+    B -->|鼠标| H["监听鼠标事件"]
+    B -->|图像| I["检测屏幕图像"]
+    B -->|声音| J["监听声音事件"]
+    B -->|人脸| K["识别人脸"]
+    B -->|元素变化| L["监控DOM变化"]
+    
+    C --> M["<b>触发条件满足</b>"]
+    D --> M
+    E --> M
+    F --> M
+    G --> M
+    H --> M
+    I --> M
+    J --> M
+    K --> M
+    L --> M
+    
+    M --> N["执行后续模块"]
+    N --> O["<b>工作流完成</b>"]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style B fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    style M fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style O fill:#e8f5e9,stroke:#388e3c,stroke-width:3px,color:#000
+\`\`\`
+
 ---
 
 ## 🌐 Webhook触发器
@@ -35,8 +72,8 @@ export const triggersGuideContent = `# ⚡ 触发器使用指南
 - 验证请求头：{"X-GitHub-Event": "push"}
 - 保存数据到变量：github_data
 
-使用curl测试：
-curl -X POST http://localhost:8000/api/triggers/webhook/your_id \\
+使用curl测试（请将端口号替换为实际配置的后端端口）：
+curl -X POST http://localhost:YOUR_PORT/api/triggers/webhook/your_id \\
   -H "X-GitHub-Event: push" \\
   -d '{"repository": "test-repo", "commits": []}'
 \`\`\`

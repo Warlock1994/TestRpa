@@ -12,8 +12,9 @@ export function DocumentationDialog({ isOpen, onClose }: DocumentationDialogProp
   const [selectedDoc, setSelectedDoc] = useState('getting-started')
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<Array<{docId: string, title: string, matches: string[]}>>([])
+  const [searchResults, setSearchResults] = useState<Array<{docId: string, title: string, heading: string, level: number, matches: string[]}>>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [highlightKeyword, setHighlightKeyword] = useState('')
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   
@@ -38,63 +39,99 @@ export function DocumentationDialog({ isOpen, onClose }: DocumentationDialogProp
     }
   }
 
-  // 搜索功能
+  // 搜索功能 - 支持三级标题搜索
   const handleSearch = (query: string) => {
     setSearchQuery(query)
     
     if (!query.trim()) {
       setSearchResults([])
       setIsSearching(false)
+      setHighlightKeyword('')
       return
     }
     
     setIsSearching(true)
-    const results: Array<{docId: string, title: string, matches: string[]}> = []
+    setHighlightKeyword(query.trim())
+    const results: Array<{docId: string, title: string, heading: string, level: number, matches: string[]}> = []
     const queryLower = query.toLowerCase()
     
     for (const doc of documents) {
       const content = documentContents[doc.id] || ''
-      const contentLower = content.toLowerCase()
+      const lines = content.split('\n')
+      
+      // 提取所有标题（一级、二级、三级）
+      const headings: Array<{text: string, level: number, lineIndex: number}> = []
+      lines.forEach((line, index) => {
+        const h1Match = line.match(/^# (.+)/)
+        const h2Match = line.match(/^## (.+)/)
+        const h3Match = line.match(/^### (.+)/)
+        
+        if (h1Match) headings.push({text: h1Match[1], level: 1, lineIndex: index})
+        else if (h2Match) headings.push({text: h2Match[1], level: 2, lineIndex: index})
+        else if (h3Match) headings.push({text: h3Match[1], level: 3, lineIndex: index})
+      })
+      
+      // 搜索每个标题及其内容
+      headings.forEach((heading, idx) => {
+        const nextHeadingIndex = idx < headings.length - 1 ? headings[idx + 1].lineIndex : lines.length
+        const sectionContent = lines.slice(heading.lineIndex, nextHeadingIndex).join('\n')
+        const sectionLower = sectionContent.toLowerCase()
+        const headingLower = heading.text.toLowerCase()
+        
+        // 检查标题或内容是否匹配
+        const headingMatch = headingLower.includes(queryLower) || pinyinMatch(heading.text, query)
+        const contentMatch = sectionLower.includes(queryLower)
+        
+        if (headingMatch || contentMatch) {
+          const matches: string[] = []
+          
+          if (contentMatch) {
+            // 提取匹配的上下文（最多3个）
+            let searchIndex = 0
+            let matchCount = 0
+            while (searchIndex < sectionLower.length && matchCount < 3) {
+              const index = sectionLower.indexOf(queryLower, searchIndex)
+              if (index === -1) break
+              
+              // 提取前后50个字符作为上下文
+              const start = Math.max(0, index - 30)
+              const end = Math.min(sectionContent.length, index + query.length + 50)
+              let context = sectionContent.slice(start, end)
+              
+              // 清理markdown标记
+              context = context.replace(/[#*`\[\]()]/g, '').replace(/\n/g, ' ').trim()
+              if (start > 0) context = '...' + context
+              if (end < sectionContent.length) context = context + '...'
+              
+              matches.push(context)
+              searchIndex = index + query.length
+              matchCount++
+            }
+          }
+          
+          results.push({
+            docId: doc.id,
+            title: doc.title,
+            heading: heading.text,
+            level: heading.level,
+            matches
+          })
+        }
+      })
+      
+      // 如果文档标题或描述匹配，但没有具体标题匹配，添加文档级别的结果
       const titleLower = doc.title.toLowerCase()
       const descLower = doc.description.toLowerCase()
-      
-      // 检查标题、描述和内容是否匹配
       const titleMatch = titleLower.includes(queryLower) || pinyinMatch(doc.title, query)
       const descMatch = descLower.includes(queryLower) || pinyinMatch(doc.description, query)
-      const contentMatch = contentLower.includes(queryLower)
       
-      if (titleMatch || descMatch || contentMatch) {
-        // 提取匹配的上下文
-        const matches: string[] = []
-        
-        if (contentMatch) {
-          // 找到所有匹配位置并提取上下文
-          let searchIndex = 0
-          let matchCount = 0
-          while (searchIndex < contentLower.length && matchCount < 3) {
-            const index = contentLower.indexOf(queryLower, searchIndex)
-            if (index === -1) break
-            
-            // 提取前后50个字符作为上下文
-            const start = Math.max(0, index - 30)
-            const end = Math.min(content.length, index + query.length + 50)
-            let context = content.slice(start, end)
-            
-            // 清理markdown标记
-            context = context.replace(/[#*`\[\]()]/g, '').replace(/\n/g, ' ').trim()
-            if (start > 0) context = '...' + context
-            if (end < content.length) context = context + '...'
-            
-            matches.push(context)
-            searchIndex = index + query.length
-            matchCount++
-          }
-        }
-        
+      if ((titleMatch || descMatch) && !results.some(r => r.docId === doc.id)) {
         results.push({
           docId: doc.id,
           title: doc.title,
-          matches
+          heading: doc.title,
+          level: 0,
+          matches: [doc.description]
         })
       }
     }
@@ -107,14 +144,14 @@ export function DocumentationDialog({ isOpen, onClose }: DocumentationDialogProp
     setSearchQuery('')
     setSearchResults([])
     setIsSearching(false)
+    setHighlightKeyword('')
     searchInputRef.current?.focus()
   }
 
-  // 选择搜索结果
+  // 选择搜索结果 - 保持搜索状态
   const selectSearchResult = (docId: string) => {
     setSelectedDoc(docId)
-    setIsSearching(false)
-    // 不清除搜索词，方便用户继续搜索
+    // 不清除搜索状态，保持高亮
   }
   
   // 下载当前文档
@@ -165,8 +202,14 @@ export function DocumentationDialog({ isOpen, onClose }: DocumentationDialogProp
   const currentDoc = documents.find(d => d.id === selectedDoc)
   
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white text-black rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden animate-scale-in">
+    <div 
+      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white text-black rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <div className="flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-blue-600" />
@@ -230,13 +273,19 @@ export function DocumentationDialog({ isOpen, onClose }: DocumentationDialogProp
                     搜索结果 ({searchResults.length})
                   </h3>
                   <div className="space-y-2">
-                    {searchResults.map(result => (
+                    {searchResults.map((result, idx) => (
                       <button
-                        key={result.docId}
+                        key={`${result.docId}-${idx}`}
                         className="w-full text-left p-2 rounded-lg hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-colors"
                         onClick={() => selectSearchResult(result.docId)}
                       >
-                        <div className="text-sm font-medium text-gray-800">{result.title}</div>
+                        <div className="text-xs text-gray-400 mb-0.5">{result.title}</div>
+                        <div className="text-sm font-medium text-gray-800 flex items-center gap-1">
+                          {result.level === 1 && <span className="text-blue-600">#</span>}
+                          {result.level === 2 && <span className="text-green-600">##</span>}
+                          {result.level === 3 && <span className="text-orange-600">###</span>}
+                          {result.heading}
+                        </div>
                         {result.matches.length > 0 && (
                           <div className="text-xs text-gray-500 mt-1 line-clamp-2">
                             {result.matches[0]}
@@ -267,7 +316,10 @@ export function DocumentationDialog({ isOpen, onClose }: DocumentationDialogProp
                               ? 'bg-blue-100 text-blue-700 border-blue-200' 
                               : 'hover:bg-gray-100 text-gray-700 border-transparent hover:border-gray-200'
                           )}
-                          onClick={() => setSelectedDoc(doc.id)}
+                          onClick={() => {
+                            setSelectedDoc(doc.id)
+                            // 切换文档时不清除搜索状态
+                          }}
                         >
                           <Icon className="w-4 h-4 shrink-0" />
                           <div className="flex-1 min-w-0">
@@ -294,7 +346,7 @@ export function DocumentationDialog({ isOpen, onClose }: DocumentationDialogProp
               className="h-full overflow-y-auto"
             >
               <div className="p-8">
-                <MarkdownRenderer content={content} />
+                <MarkdownRenderer content={content} highlightKeyword={highlightKeyword} />
               </div>
             </div>
             

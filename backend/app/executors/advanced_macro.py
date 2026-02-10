@@ -210,8 +210,8 @@ class MacroRecorderExecutor(ModuleExecutor):
                 inp.union.ki.wScan = user32.MapVirtualKeyW(vk_code, 0)
                 inp.union.ki.dwFlags = KEYEVENTF_KEYUP if is_up else 0
                 inp.union.ki.time = 0
-                inp.union.ki.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                inp.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
             
             def send_unicode_char(char):
                 # 按下
@@ -221,8 +221,8 @@ class MacroRecorderExecutor(ModuleExecutor):
                 inp_down.union.ki.wScan = ord(char)
                 inp_down.union.ki.dwFlags = KEYEVENTF_UNICODE
                 inp_down.union.ki.time = 0
-                inp_down.union.ki.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp_down), ctypes.sizeof(INPUT))
+                inp_down.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp_down), ctypes.sizeof(INPUT))
                 # 释放
                 inp_up = INPUT()
                 inp_up.type = INPUT_KEYBOARD
@@ -230,8 +230,8 @@ class MacroRecorderExecutor(ModuleExecutor):
                 inp_up.union.ki.wScan = ord(char)
                 inp_up.union.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP
                 inp_up.union.ki.time = 0
-                inp_up.union.ki.dwExtraInfo = None
-                user32.SendInput(1, ctypes.byref(inp_up), ctypes.sizeof(INPUT))
+                inp_up.union.ki.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
+                user32.SendInput(1, ctypes.pointer(inp_up), ctypes.sizeof(INPUT))
 
             # 如果使用相对位置，获取当前鼠标位置作为基准
             if use_relative_position:

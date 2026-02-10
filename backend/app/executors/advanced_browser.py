@@ -2,6 +2,7 @@
 from .base import ModuleExecutor, ExecutionContext, ModuleResult, register_executor, escape_css_selector
 from .type_utils import to_int, to_float, parse_search_region
 from pathlib import Path
+import asyncio
 import base64
 import os
 import re

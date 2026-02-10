@@ -54,8 +54,10 @@ async def get_default_folder():
 @router.post("/check-exists")
 async def check_workflow_exists(request: SaveWorkflowRequest):
     """检查工作流文件是否已存在"""
-    # 从 content 中提取 folder 信息，或使用默认值
-    folder = request.content.get('_folder', DEFAULT_WORKFLOW_FOLDER)
+    # 从 content 中提取 folder 信息，如果为空则使用默认值
+    folder = request.content.get('_folder')
+    if not folder:  # 如果为 None 或空字符串，使用默认文件夹
+        folder = DEFAULT_WORKFLOW_FOLDER
     
     filename = request.filename
     if not filename.endswith('.json'):
@@ -74,7 +76,8 @@ async def check_workflow_exists(request: SaveWorkflowRequest):
 @router.post("/list")
 async def list_workflows(config: WorkflowFolderConfig):
     """列出指定文件夹中的所有工作流文件"""
-    folder = config.folder or DEFAULT_WORKFLOW_FOLDER
+    # 如果 folder 为空字符串或 None，使用默认文件夹
+    folder = config.folder if config.folder else DEFAULT_WORKFLOW_FOLDER
     
     if not os.path.exists(folder):
         ensure_folder_exists(folder)
@@ -151,14 +154,16 @@ async def save_workflow(request: SaveWorkflowRequest, config: WorkflowFolderConf
 @router.post("/save-to-folder")
 async def save_workflow_to_folder(request: SaveWorkflowRequest):
     """保存工作流到指定文件夹（从请求体获取文件夹路径）"""
-    # 从 content 中提取 folder 信息，或使用默认值
-    folder = request.content.get('_folder', DEFAULT_WORKFLOW_FOLDER)
+    # 从 content 中提取 folder 信息，如果为空则使用默认值
+    folder = request.content.get('_folder')
+    if not folder:  # 如果为 None 或空字符串，使用默认文件夹
+        folder = DEFAULT_WORKFLOW_FOLDER
     
     # 移除临时的 _folder 字段
     content = {k: v for k, v in request.content.items() if k != '_folder'}
     
     if not ensure_folder_exists(folder):
-        return {"success": False, "error": "无法创建文件夹"}
+        return {"success": False, "error": "[ERROR] 未配置工作流保存路径"}
     
     filename = request.filename
     if not filename.endswith('.json'):
@@ -180,7 +185,8 @@ async def save_workflow_to_folder(request: SaveWorkflowRequest):
 @router.get("/load/{filename:path}")
 async def load_workflow(filename: str, folder: str = None):
     """加载指定的工作流文件"""
-    folder = folder or DEFAULT_WORKFLOW_FOLDER
+    # 如果 folder 为空字符串或 None，使用默认文件夹
+    folder = folder if folder else DEFAULT_WORKFLOW_FOLDER
     filepath = os.path.join(folder, filename)
     
     if not os.path.exists(filepath):
@@ -199,7 +205,8 @@ async def load_workflow(filename: str, folder: str = None):
 @router.post("/delete")
 async def delete_workflow(filename: str, folder: str = None):
     """删除指定的工作流文件"""
-    folder = folder or DEFAULT_WORKFLOW_FOLDER
+    # 如果 folder 为空字符串或 None，使用默认文件夹
+    folder = folder if folder else DEFAULT_WORKFLOW_FOLDER
     filepath = os.path.join(folder, filename)
     
     if not os.path.exists(filepath):

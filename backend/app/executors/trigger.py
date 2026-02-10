@@ -78,8 +78,9 @@ class WebhookTriggerExecutor(ModuleExecutor):
 
         # 注册Webhook到全局触发器管理器
         from app.services.trigger_manager import trigger_manager
+        from app.utils.config import get_backend_url
         
-        webhook_url = f"http://localhost:8000/api/triggers/webhook/{webhook_id}"
+        webhook_url = f"{get_backend_url()}/api/triggers/webhook/{webhook_id}"
         
         # 创建等待事件
         event = asyncio.Event()

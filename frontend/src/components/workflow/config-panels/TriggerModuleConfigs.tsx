@@ -8,12 +8,12 @@ import { SelectNative as Select } from '@/components/ui/select-native'
 import { Textarea } from '@/components/ui/textarea'
 import { VariableInput } from '@/components/ui/variable-input'
 import { VariableNameInput } from '@/components/ui/variable-name-input'
-import { PathInput } from '@/components/ui/path-input'
 import { DualCoordinateInput } from '@/components/ui/dual-coordinate-input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ImagePathInput } from '@/components/ui/image-path-input'
 import { AlertCircle, Copy, Check } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { getBackendUrl } from '@/services/api'
 
 // Webhook触发器配置
 export function WebhookTriggerConfig({
@@ -31,7 +31,7 @@ export function WebhookTriggerConfig({
     onChange('webhookId', webhookId)
   }
 
-  const webhookUrl = `http://localhost:8000/api/triggers/webhook/${webhookId}`
+  const webhookUrl = `${getBackendUrl()}/api/triggers/webhook/${webhookId}`
   const method = (data.method as string) || 'ANY'
 
   const copyToClipboard = () => {

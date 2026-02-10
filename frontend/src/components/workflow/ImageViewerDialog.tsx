@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, ZoomIn, ZoomOut, RotateCw, Download, Maximize, Minimize } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getBackendUrl } from '@/services/api'
 
 interface ImageViewerDialogProps {
   imageUrl: string
@@ -29,12 +30,12 @@ export function ImageViewerDialog({ imageUrl, autoClose, displayTime, onClose }:
     console.log('[ImageViewer] 原始 URL:', url)
     if (url.match(/^[A-Za-z]:[\\\/]/)) {
       // Windows 绝对路径，通过后端 API 访问
-      const apiUrl = `http://localhost:8000/api/system/local-file?path=${encodeURIComponent(url)}`
+      const apiUrl = `${getBackendUrl()}/api/system/local-file?path=${encodeURIComponent(url)}`
       console.log('[ImageViewer] 转换为 API URL:', apiUrl)
       return apiUrl
     } else if (url.startsWith('/') && !url.startsWith('//')) {
       // Unix 绝对路径
-      const apiUrl = `http://localhost:8000/api/system/local-file?path=${encodeURIComponent(url)}`
+      const apiUrl = `${getBackendUrl()}/api/system/local-file?path=${encodeURIComponent(url)}`
       console.log('[ImageViewer] 转换为 API URL:', apiUrl)
       return apiUrl
     }
@@ -47,7 +48,7 @@ export function ImageViewerDialog({ imageUrl, autoClose, displayTime, onClose }:
     setLoadingMessage('正在转换图片格式...')
     
     try {
-      const response = await fetch('http://localhost:8000/api/system/convert-image', {
+      const response = await fetch(`${getBackendUrl()}/api/system/convert-image`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl: url })
@@ -56,7 +57,7 @@ export function ImageViewerDialog({ imageUrl, autoClose, displayTime, onClose }:
       const result = await response.json()
       
       if (result.success) {
-        return `http://localhost:8000${result.imagePath}`
+        return `${getBackendUrl()}${result.imagePath}`
       } else {
         console.error('[ImageViewer] 转换失败:', result.error)
         return null

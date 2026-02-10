@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { ChevronRight, Folder, Image, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { imageAssetApi } from '@/services/api'
+import { getBackendBaseUrl } from '@/services/config'
 import type { ImageAsset } from '@/types'
 
 interface HierarchicalImageSelectorProps {
@@ -176,7 +177,7 @@ export function HierarchicalImageSelector({ value, onChange, className }: Hierar
 
                   {/* 文件 */}
                   {files.map(asset => {
-                    const API_BASE = sessionStorage.getItem('backendBaseUrl') || 'http://localhost:1122'
+                    const API_BASE = getBackendBaseUrl()
                     const assetWithPath = asset as ImageAsset & { path?: string }
                     const assetPath = assetWithPath.path || asset.originalName
                     return (

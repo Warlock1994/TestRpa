@@ -123,18 +123,66 @@ def start_browser(browser_type: str = 'msedge', executable_path: Optional[str] =
                     if _browser_proc.poll() is not None:
                         stderr = _browser_proc.stderr.read()
                         print(f"[BrowserManager] Process exited, stderr: {stderr}")
+                        
+                        # 详细的错误分类
                         if "user-data-dir" in stderr.lower() or "already in use" in stderr.lower():
-                            return False, "浏览器数据目录被占用，请关闭其他使用该目录的浏览器"
-                        return False, f"浏览器进程异常退出: {stderr[:200] if stderr else '无错误信息'}"
+                            error_detail = "❌ 浏览器数据目录被占用"
+                            solution = f"\n\n💡 解决方案:\n1. 关闭所有 {browser_type} 浏览器窗口\n2. 打开任务管理器，结束所有 {browser_type}.exe 进程\n3. 如果问题仍然存在，重启电脑"
+                            return False, error_detail + solution
+                        
+                        elif "executable doesn't exist" in stderr.lower() or "browser is not installed" in stderr.lower():
+                            error_detail = f"❌ {browser_type} 浏览器驱动未安装"
+                            solution = f"\n\n💡 解决方案:\n1. 运行命令安装浏览器驱动:\n   playwright install {browser_type}\n\n2. 或者安装所有浏览器:\n   playwright install\n\n3. 如果命令失败，请检查网络连接"
+                            return False, error_detail + solution
+                        
+                        elif "permission denied" in stderr.lower() or "access denied" in stderr.lower():
+                            error_detail = "❌ 权限不足"
+                            solution = "\n\n💡 解决方案:\n1. 以管理员身份运行 WebRPA\n2. 检查杀毒软件是否阻止了浏览器启动\n3. 检查文件和目录的权限设置"
+                            return False, error_detail + solution
+                        
+                        elif stderr:
+                            error_detail = f"❌ 浏览器进程异常退出"
+                            error_msg = stderr[:500] if len(stderr) > 500 else stderr
+                            solution = f"\n\n原始错误:\n{error_msg}\n\n💡 解决方案:\n1. 检查系统资源是否充足\n2. 重启电脑后重试\n3. 查看完整日志以获取更多信息"
+                            return False, error_detail + solution
+                        else:
+                            return False, "❌ 浏览器进程异常退出（无错误信息）\n\n💡 解决方案:\n1. 重启电脑后重试\n2. 检查系统日志\n3. 尝试使用其他浏览器类型"
                     time.sleep(0.1)
             
             print("[BrowserManager] Timeout waiting for browser to start")
-            return False, "浏览器启动超时（30秒），请检查系统资源或重试"
+            
+            # 超时后检查进程状态
+            if _browser_proc and _browser_proc.poll() is not None:
+                stderr = _browser_proc.stderr.read()
+                error_detail = "❌ 浏览器启动超时（进程已退出）"
+                if stderr:
+                    error_msg = stderr[:500] if len(stderr) > 500 else stderr
+                    solution = f"\n\n原始错误:\n{error_msg}\n\n💡 解决方案:\n1. 检查系统资源是否充足（内存、CPU）\n2. 关闭其他占用资源的程序\n3. 重启电脑后重试"
+                else:
+                    solution = "\n\n💡 解决方案:\n1. 检查系统资源是否充足\n2. 重启电脑后重试\n3. 尝试使用其他浏览器类型"
+                return False, error_detail + solution
+            else:
+                error_detail = "❌ 浏览器启动超时（30秒）"
+                solution = "\n\n💡 解决方案:\n1. 系统配置较低，浏览器启动较慢，请稍后重试\n2. 检查系统资源是否充足（内存、磁盘空间）\n3. 关闭其他占用资源的程序\n4. 重启电脑后重试\n5. 如果是首次启动，可能正在下载浏览器驱动，请耐心等待"
+                return False, error_detail + solution
         except Exception as e:
             import traceback
+            error_trace = traceback.format_exc()
             print(f"[BrowserManager] Failed to start browser: {e}")
-            traceback.print_exc()
-            return False, f"启动浏览器进程失败: {str(e)}"
+            print(error_trace)
+            
+            # 详细的错误分类
+            error_msg = str(e)
+            error_detail = "❌ 启动浏览器进程失败"
+            
+            if "filenotfounderror" in error_msg.lower() or "no such file" in error_msg.lower():
+                solution = "\n\n💡 解决方案:\n1. 检查 Python 环境是否正确\n2. 检查 browser_process.py 文件是否存在\n3. 重新安装 WebRPA"
+            elif "permission" in error_msg.lower():
+                solution = "\n\n💡 解决方案:\n1. 以管理员身份运行 WebRPA\n2. 检查文件权限设置\n3. 检查杀毒软件是否阻止了进程启动"
+            else:
+                solution = f"\n\n原始错误:\n{error_msg}\n\n💡 解决方案:\n1. 重启电脑后重试\n2. 检查系统日志\n3. 联系技术支持并提供完整错误信息"
+            
+            return False, error_detail + solution
 
 
 def stop_browser():

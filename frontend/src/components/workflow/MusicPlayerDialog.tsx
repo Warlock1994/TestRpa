@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Play, Pause, Repeat, Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
+import { getBackendUrl } from '@/services/api'
 
 interface MusicPlayerDialogProps {
   audioUrl: string
@@ -55,7 +56,7 @@ export function MusicPlayerDialog({ audioUrl, waitForEnd, onClose }: MusicPlayer
         setError(null)
         
         // 调用后端转换音频
-        const response = await fetch('http://localhost:8000/api/system/convert-audio', {
+        const response = await fetch(`${getBackendUrl()}/api/system/convert-audio`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ audioUrl })
@@ -65,7 +66,7 @@ export function MusicPlayerDialog({ audioUrl, waitForEnd, onClose }: MusicPlayer
         
         if (result.success) {
           // 返回的是相对路径，需要加上后端地址
-          setConvertedUrl(`http://localhost:8000${result.audioPath}`)
+          setConvertedUrl(`${getBackendUrl()}${result.audioPath}`)
         } else {
           setError(result.error || '音频转换失败')
           setIsLoading(false)

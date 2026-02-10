@@ -183,8 +183,14 @@ export function AutoBrowserDialog({ isOpen, onClose, onLog }: AutoBrowserDialogP
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in">
-      <div className="bg-white rounded-xl shadow-2xl w-[500px] max-h-[90vh] flex flex-col overflow-hidden animate-scale-in">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-xl shadow-2xl w-[500px] max-h-[90vh] flex flex-col overflow-hidden animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* 头部 */}
         <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-cyan-50 via-blue-50/50 to-cyan-50 flex-shrink-0">
           <div className="flex items-center gap-2">

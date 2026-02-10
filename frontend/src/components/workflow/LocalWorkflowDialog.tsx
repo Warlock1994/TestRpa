@@ -44,8 +44,8 @@ export function LocalWorkflowDialog({ isOpen, onClose, onLog }: LocalWorkflowDia
 
   // 加载工作流列表
   const loadWorkflows = async () => {
-    const folder = config.workflow?.localFolder || defaultFolder
-    if (!folder) return
+    // 使用当前文件夹或默认文件夹
+    const folder = config.workflow?.localFolder || defaultFolder || ''
     
     setLoading(true)
     try {

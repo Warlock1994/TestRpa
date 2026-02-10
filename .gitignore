@@ -179,13 +179,15 @@ test_*.ts
 # ============================================
 
 # FFmpeg 可执行文件（约 100MB）
-# backend/ffmpeg.exe
-# backend/ffprobe.exe
-# backend/m3u8.exe
-# backend/pandoc.exe
+backend/ffmpeg.exe
+backend/ffprobe.exe
+backend/m3u8.exe
+backend/pandoc.exe
 
-# 注意：这些工具文件可以选择性提交
-# 如果不提交，用户需要自行下载
+# scrcpy 手机镜像工具（约 50MB）
+backend/scrcpy/
+
+# 用户需要自行下载
 
 # ============================================
 # 其他

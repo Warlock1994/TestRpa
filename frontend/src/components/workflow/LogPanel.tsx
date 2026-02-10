@@ -53,8 +53,6 @@ export function LogPanel({ onLogClick }: LogPanelProps) {
     clearCollectedData,
     name: workflowName,
     dataAssets,
-    addDataAsset,
-    deleteDataAsset,
     bottomPanelTab: activeTab,
     setBottomPanelTab: setActiveTab,
     verboseLog,
@@ -63,7 +61,7 @@ export function LogPanel({ onLogClick }: LogPanelProps) {
     setMaxLogCount,
   } = useWorkflowStore()
 
-  const { confirm, alert, ConfirmDialog } = useConfirm()
+  const { alert, ConfirmDialog } = useConfirm()
   const logEndRef = useRef<HTMLDivElement>(null)
 
   const [isCollapsed, setIsCollapsed] = useState(false)

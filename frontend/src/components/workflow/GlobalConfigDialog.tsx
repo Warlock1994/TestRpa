@@ -84,8 +84,14 @@ export function GlobalConfigDialog({ isOpen, onClose }: GlobalConfigDialogProps)
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white text-black border border-gray-200 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-scale-in">
+    <div 
+      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white text-black border border-gray-200 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* 标题栏 */}
         <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-50 via-cyan-50/50 to-teal-50">
           <div className="flex items-center gap-2">

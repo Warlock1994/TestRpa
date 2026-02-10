@@ -44,6 +44,7 @@ class WorkflowUpdate(BaseModel):
 class BrowserConfig(BaseModel):
     type: str = 'msedge'
     executablePath: Optional[str] = None
+    userDataDir: Optional[str] = None
     fullscreen: bool = False
     autoCloseBrowser: bool = False
     launchArgs: Optional[str] = None
@@ -316,6 +317,7 @@ async def execute_workflow(workflow_id: str, background_tasks: BackgroundTasks, 
         browser_config={
             'type': options.browserConfig.type if options.browserConfig else 'msedge',
             'executablePath': options.browserConfig.executablePath if options.browserConfig else None,
+            'userDataDir': options.browserConfig.userDataDir if options.browserConfig else None,
             'fullscreen': options.browserConfig.fullscreen if options.browserConfig else False,
             'launchArgs': options.browserConfig.launchArgs if options.browserConfig else None,
         } if options.browserConfig else None,

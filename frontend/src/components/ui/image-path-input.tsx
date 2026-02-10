@@ -3,6 +3,7 @@ import { FolderOpen, ChevronRight, Folder, Image } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from './button'
 import { systemApi, imageAssetApi } from '@/services/api'
+import { getBackendBaseUrl } from '@/services/config'
 import type { ImageAsset } from '@/types'
 
 interface ImagePathInputProps {
@@ -95,7 +96,7 @@ export function ImagePathInput({ value, onChange, className, placeholder = 'è¾“å
     }
   }, [isOpen])
 
-  const API_BASE = sessionStorage.getItem('backendBaseUrl') || 'http://localhost:1122'
+  const API_BASE = getBackendBaseUrl()
 
   return (
     <div ref={containerRef} className={cn('relative', className)}>

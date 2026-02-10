@@ -223,7 +223,7 @@ class RealKeyboardExecutor(ModuleExecutor):
                 inputs[0].union.ki.wScan = ord(char)
                 inputs[0].union.ki.dwFlags = KEYEVENTF_UNICODE
                 inputs[0].union.ki.time = 0
-                inputs[0].union.ki.dwExtraInfo = None
+                inputs[0].union.ki.dwExtraInfo = ctypes.pointer(c_ulong(0))
                 
                 # 释放
                 inputs[1].type = INPUT_KEYBOARD
@@ -231,7 +231,7 @@ class RealKeyboardExecutor(ModuleExecutor):
                 inputs[1].union.ki.wScan = ord(char)
                 inputs[1].union.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP
                 inputs[1].union.ki.time = 0
-                inputs[1].union.ki.dwExtraInfo = None
+                inputs[1].union.ki.dwExtraInfo = ctypes.pointer(c_ulong(0))
                 
                 result = SendInput(2, inputs, sizeof(INPUT))
                 return result
@@ -244,7 +244,7 @@ class RealKeyboardExecutor(ModuleExecutor):
                 inputs[0].union.ki.wScan = ctypes.windll.user32.MapVirtualKeyW(vk_code, 0)
                 inputs[0].union.ki.dwFlags = 0
                 inputs[0].union.ki.time = 0
-                inputs[0].union.ki.dwExtraInfo = None
+                inputs[0].union.ki.dwExtraInfo = ctypes.pointer(c_ulong(0))
                 return SendInput(1, inputs, sizeof(INPUT))
             
             def send_key_up(vk_code):
@@ -255,7 +255,7 @@ class RealKeyboardExecutor(ModuleExecutor):
                 inputs[0].union.ki.wScan = ctypes.windll.user32.MapVirtualKeyW(vk_code, 0)
                 inputs[0].union.ki.dwFlags = KEYEVENTF_KEYUP
                 inputs[0].union.ki.time = 0
-                inputs[0].union.ki.dwExtraInfo = None
+                inputs[0].union.ki.dwExtraInfo = ctypes.pointer(c_ulong(0))
                 return SendInput(1, inputs, sizeof(INPUT))
 
             if input_type == "text":

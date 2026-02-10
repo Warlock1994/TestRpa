@@ -46,6 +46,7 @@ from app.api.system import router as system_router, set_napcat_sio
 from app.api.local_workflows import router as local_workflows_router
 from app.api.triggers import router as triggers_router
 from app.api.scheduled_tasks import router as scheduled_tasks_router
+from app.api.phone import router as phone_router
 app.include_router(workflows_router)
 app.include_router(element_picker_router)
 app.include_router(data_assets_router)
@@ -55,6 +56,7 @@ app.include_router(system_router)
 app.include_router(local_workflows_router)
 app.include_router(triggers_router)
 app.include_router(scheduled_tasks_router)
+app.include_router(phone_router)
 
 # 设置 NapCat 的 socketio 实例
 set_napcat_sio(sio)

@@ -1,5 +1,6 @@
 import { Button } from '../ui/button'
 import { Download, X, Sparkles } from 'lucide-react'
+import { getBackendUrl } from '@/services/api'
 
 interface UpdateDialogProps {
   isOpen: boolean
@@ -23,7 +24,7 @@ export function UpdateDialog({
   const handleDownload = async () => {
     try {
       // 通过后端 API 使用系统默认浏览器打开链接
-      await fetch('http://localhost:8000/api/system/open-url', {
+      await fetch(`${getBackendUrl()}/api/system/open-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: downloadUrl }),

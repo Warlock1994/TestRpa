@@ -188,6 +188,83 @@ export interface AIElementSelectorConfig extends ModuleConfig {
   verbose?: boolean
 }
 
+// ============ 手机自动化模块配置 ============
+
+export interface PhoneConnectConfig extends ModuleConfig {
+  deviceId?: string
+}
+
+export interface PhoneTapConfig extends ModuleConfig {
+  x: string | number
+  y: string | number
+}
+
+export interface PhoneSwipeConfig extends ModuleConfig {
+  startX: string | number
+  startY: string | number
+  endX: string | number
+  endY: string | number
+  duration?: number
+}
+
+export interface PhoneLongPressConfig extends ModuleConfig {
+  x: string | number
+  y: string | number
+  duration?: number
+}
+
+export interface PhoneInputTextConfig extends ModuleConfig {
+  text: string
+}
+
+export type PhoneKeyType = 'HOME' | 'BACK' | 'RECENT' | 'POWER' | 'VOLUME_UP' | 'VOLUME_DOWN' | 'MENU' | 'ENTER'
+
+export interface PhonePressKeyConfig extends ModuleConfig {
+  key: PhoneKeyType
+}
+
+export interface PhoneScreenshotConfig extends ModuleConfig {
+  savePath?: string
+  variableName?: string
+}
+
+export interface PhoneStartMirrorConfig extends ModuleConfig {
+  bitRate?: number
+  maxSize?: number
+  stayAwake?: boolean
+  turnScreenOff?: boolean
+}
+
+export interface PhoneStopMirrorConfig extends ModuleConfig {}
+
+export interface PhoneInstallAppConfig extends ModuleConfig {
+  apkPath: string
+}
+
+export interface PhoneStartAppConfig extends ModuleConfig {
+  packageName: string
+  activityName?: string
+}
+
+export interface PhoneStopAppConfig extends ModuleConfig {
+  packageName: string
+}
+
+export interface PhoneUninstallAppConfig extends ModuleConfig {
+  packageName: string
+}
+
+export interface PhonePushFileConfig extends ModuleConfig {
+  localPath: string
+  remotePath: string
+}
+
+export interface PhonePullFileConfig extends ModuleConfig {
+  remotePath: string
+  localPath: string
+  variableName?: string
+}
+
 // 所有模块配置类型联合
 export type AnyModuleConfig =
   | OpenPageConfig
@@ -215,3 +292,18 @@ export type AnyModuleConfig =
   | ForeachConfig
   | BreakLoopConfig
   | ContinueLoopConfig
+  | PhoneConnectConfig
+  | PhoneTapConfig
+  | PhoneSwipeConfig
+  | PhoneLongPressConfig
+  | PhoneInputTextConfig
+  | PhonePressKeyConfig
+  | PhoneScreenshotConfig
+  | PhoneStartMirrorConfig
+  | PhoneStopMirrorConfig
+  | PhoneInstallAppConfig
+  | PhoneStartAppConfig
+  | PhoneStopAppConfig
+  | PhoneUninstallAppConfig
+  | PhonePushFileConfig
+  | PhonePullFileConfig

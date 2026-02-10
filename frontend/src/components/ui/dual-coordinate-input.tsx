@@ -4,6 +4,7 @@ import { NumberInput } from './number-input'
 import { Button } from './button'
 import { Label } from './label'
 import { cn } from '@/lib/utils'
+import { getBackendUrl } from '@/services/api'
 
 interface DualCoordinateInputProps {
   xValue: number
@@ -34,7 +35,7 @@ export function DualCoordinateInput({
     setStatusText('Ctrl+左键 确认 | Ctrl+右键/ESC 取消')
     
     try {
-      const response = await fetch('http://localhost:8000/api/system/pick-mouse-position', {
+      const response = await fetch(`${getBackendUrl()}/api/system/pick-mouse-position`, {
         method: 'POST',
       })
       

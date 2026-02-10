@@ -181,6 +181,13 @@ export type ModuleType =
   | 'add_subtitle'
   | 'adjust_volume'
   | 'resize_video'
+  // 格式工厂
+  | 'image_format_convert'
+  | 'video_format_convert'
+  | 'audio_format_convert'
+  | 'video_to_audio'
+  | 'video_to_gif'
+  | 'batch_format_convert'
   // AI识别
   | 'face_recognition'
   | 'image_ocr'
@@ -275,6 +282,26 @@ export type ModuleType =
   | 'hex_to_cmyk'
   | 'uuid_generator'
   | 'printer_call'
+  // 手机自动化
+  | 'phone_tap'
+  | 'phone_swipe'
+  | 'phone_long_press'
+  | 'phone_input_text'
+  | 'phone_press_key'
+  | 'phone_screenshot'
+  | 'phone_start_mirror'
+  | 'phone_stop_mirror'
+  | 'phone_install_app'
+  | 'phone_start_app'
+  | 'phone_stop_app'
+  | 'phone_uninstall_app'
+  | 'phone_push_file'
+  | 'phone_pull_file'
+  | 'phone_click_image'
+  | 'phone_click_text'
+  | 'phone_wait_image'
+  | 'phone_set_volume'
+  | 'phone_set_brightness'
 
 // Excel文件资源
 export interface DataAsset {
