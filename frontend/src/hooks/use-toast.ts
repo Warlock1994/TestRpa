@@ -8,6 +8,8 @@ export interface Toast {
   description?: React.ReactNode
   action?: ToastActionElement
   variant?: "default" | "destructive"
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const TOAST_LIMIT = 1
@@ -138,14 +140,6 @@ function dispatch(action: Action) {
   listeners.forEach((listener) => {
     listener(memoryState)
   })
-}
-
-interface Toast {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-  variant?: "default" | "destructive"
 }
 
 function toast({ ...props }: Omit<ToasterToast, "id">) {

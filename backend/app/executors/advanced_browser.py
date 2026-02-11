@@ -35,12 +35,15 @@ class SelectDropdownExecutor(ModuleExecutor):
             await context.switch_to_latest_page()
             
             # 先等待页面加载完成
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            wait_timeout = None if timeout_ms == 0 else timeout_ms
+            
             try:
-                await context.page.wait_for_load_state('domcontentloaded', timeout=timeout_ms)
+                await context.page.wait_for_load_state('domcontentloaded', timeout=wait_timeout)
             except:
                 pass
             
-            await context.page.wait_for_selector(escape_css_selector(selector), state='visible', timeout=timeout_ms)
+            await context.page.wait_for_selector(escape_css_selector(selector), state='visible', timeout=wait_timeout)
             element = context.page.locator(escape_css_selector(selector))
             
             if select_by == 'value':
@@ -241,9 +244,12 @@ class UploadFileExecutor(ModuleExecutor):
             if tag_name == "input" and input_type == "file":
                 await context.page.set_input_files(selector, file_path)
             else:
+                # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+                click_timeout = None if timeout_ms == 0 else timeout_ms
+                
                 try:
-                    async with context.page.expect_file_chooser(timeout=timeout_ms) as fc_info:
-                        await element.click()
+                    async with context.page.expect_file_chooser(timeout=click_timeout) as fc_info:
+                        await element.click(timeout=click_timeout)
                     file_chooser = await fc_info.value
                     await file_chooser.set_files(file_path)
                 except Exception:

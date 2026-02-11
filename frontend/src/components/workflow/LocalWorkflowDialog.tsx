@@ -233,7 +233,7 @@ export function LocalWorkflowDialog({ isOpen, onClose, onLog }: LocalWorkflowDia
         </div>
       </div>
       
-      {ConfirmDialog}
+      <ConfirmDialog />
     </div>
   )
 }

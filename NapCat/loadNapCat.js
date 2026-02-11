@@ -1,0 +1,1 @@
+(async () => {await import("file:///E:/GitHubProjects/WebRPA/NapCat/napcat.mjs")})()

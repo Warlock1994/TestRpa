@@ -4,10 +4,12 @@ import { SelectNative as Select } from '@/components/ui/select-native'
 import { VariableInput } from '@/components/ui/variable-input'
 import { VariableNameInput } from '@/components/ui/variable-name-input'
 import { Button } from '@/components/ui/button'
+import { QQContactSelect } from '@/components/ui/qq-contact-select'
 import { useState, useEffect, useCallback } from 'react'
 import { ExternalLink, CheckCircle, XCircle, Loader2, Play, Square, RefreshCw, X, FolderOpen } from 'lucide-react'
 import { systemApi } from '@/services/api'
 import { getBackendBaseUrl } from '@/services/config'
+import { ImagePathInput } from '@/components/ui/image-path-input'
 
 // NapCat 服务状态类型
 interface NapCatStatus {
@@ -15,6 +17,9 @@ interface NapCatStatus {
   qq_installed: boolean
   qq_path: string | null
   is_running: boolean
+  qq_running?: boolean  // QQ 进程是否在运行
+  onebot_available?: boolean  // OneBot API 是否可用
+  onebot_logged_in?: boolean  // 是否已登录
   qq_number: string | null
   webui_url: string | null
   onebot_port: number
@@ -47,11 +52,35 @@ function QRCodeDialog({
     }
   }, [webuiUrl])
 
-  // 加载二维码
-  const loadQRCode = useCallback(() => {
+  // 加载二维码 - 轮询检测直到二维码可用
+  const loadQRCode = useCallback(async () => {
     setLoading(true)
-    // 添加时间戳防止缓存
     const API_BASE = getBackendBaseUrl()
+    
+    // 轮询检测二维码是否可用（最多等待10秒）
+    let attempts = 0
+    const maxAttempts = 20 // 10秒 (每次500ms)
+    
+    while (attempts < maxAttempts) {
+      try {
+        const testUrl = `${API_BASE}/api/system/napcat/qrcode?t=${Date.now()}`
+        const response = await fetch(testUrl, { method: 'GET' })
+        
+        if (response.ok) {
+          // 二维码可用，显示它
+          setQrcodeUrl(testUrl)
+          setLoading(false)
+          return
+        }
+      } catch (e) {
+        // 继续等待
+      }
+      
+      attempts++
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    
+    // 超时后仍然尝试显示（可能会显示加载失败）
     const url = `${API_BASE}/api/system/napcat/qrcode?t=${Date.now()}`
     setQrcodeUrl(url)
     setLoading(false)
@@ -83,12 +112,18 @@ function QRCodeDialog({
     }
   }, [loadQRCode])
 
-  // 轮询检测登录状态
+  // 轮询检测登录状态和二维码刷新
   useEffect(() => {
     if (!isOpen || step !== 'qrcode') return
     
     // 立即加载二维码
     loadQRCode()
+    
+    // 二维码每2分钟过期，提前10秒自动刷新
+    const qrcodeRefreshInterval = setInterval(() => {
+      console.log('[QRCodeDialog] 二维码即将过期，自动刷新')
+      loadQRCode()
+    }, 110000) // 110秒 = 1分50秒
     
     // 轮询检测登录状态
     const checkLogin = async () => {
@@ -114,10 +149,11 @@ function QRCodeDialog({
       }
     }
     
-    const interval = setInterval(checkLogin, 1000)
+    const loginCheckInterval = setInterval(checkLogin, 1000)
     
     return () => {
-      clearInterval(interval)
+      clearInterval(qrcodeRefreshInterval)
+      clearInterval(loginCheckInterval)
     }
   }, [isOpen, step, loadQRCode, onLoginSuccess])
 
@@ -448,25 +484,46 @@ function NapCatServiceManager() {
     )
   }
 
+  // 检测到 QQ 手动启动的情况
+  const isManualQQ = status?.qq_running && !status?.onebot_available
+
   return (
     <>
-      <div className="p-3 bg-green-50 rounded-lg border border-green-200 mb-4 space-y-3">
+      <div className={`p-3 rounded-lg border mb-4 space-y-3 ${
+        isManualQQ 
+          ? 'bg-amber-50 border-amber-200' 
+          : 'bg-green-50 border-green-200'
+      }`}>
         <div className="flex items-center justify-between">
-          <p className="text-xs text-green-800 font-medium">
-            ✅ 内置 NapCat 服务
+          <p className={`text-xs font-medium ${
+            isManualQQ ? 'text-amber-800' : 'text-green-800'
+          }`}>
+            {isManualQQ ? '⚠️ 检测到手动启动的 QQ' : '✅ 内置 NapCat 服务'}
           </p>
           <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={fetchStatus}>
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
         
+        {/* 手动启动 QQ 的警告提示 */}
+        {isManualQQ && (
+          <div className="text-xs text-amber-700 space-y-1">
+            <p>检测到 QQ 进程正在运行，但 NapCat 服务未启动。</p>
+            <p className="font-medium">QQ 支持多开，您可以：</p>
+            <ul className="list-disc list-inside pl-2 space-y-0.5">
+              <li>直接启动 NapCat（会启动新的 QQ 实例）</li>
+              <li>或关闭手动启动的 QQ 后再启动</li>
+            </ul>
+          </div>
+        )}
+        
         {/* 服务状态 */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-600">状态:</span>
+          <span className="text-xs text-gray-600">NapCat 状态:</span>
           {status?.is_running ? (
             <span className="flex items-center gap-1 text-xs text-green-600">
               <CheckCircle className="w-3 h-3" />
-              运行中
+              运行中 {status?.qq_number && `(QQ: ${status.qq_number})`}
             </span>
           ) : (
             <span className="flex items-center gap-1 text-xs text-gray-500">
@@ -475,6 +532,24 @@ function NapCatServiceManager() {
             </span>
           )}
         </div>
+        
+        {/* OneBot API 状态 */}
+        {status?.qq_running && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-600">OneBot API:</span>
+            {status?.onebot_available ? (
+              <span className="flex items-center gap-1 text-xs text-green-600">
+                <CheckCircle className="w-3 h-3" />
+                可用
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-xs text-red-500">
+                <XCircle className="w-3 h-3" />
+                不可用
+              </span>
+            )}
+          </div>
+        )}
 
         {/* QQ号输入（仅在未运行时显示） */}
         {!status?.is_running && (
@@ -579,10 +654,11 @@ export function QQSendMessageConfig({ data, onChange }: { data: NodeData; onChan
       </div>
       <div className="space-y-2">
         <Label htmlFor="targetId">{(data.messageType as string) === 'group' ? '群号' : 'QQ号'}</Label>
-        <VariableInput
+        <QQContactSelect
           value={(data.targetId as string) || ''}
           onChange={(v) => onChange('targetId', v)}
-          placeholder={(data.messageType as string) === 'group' ? '目标群号' : '目标QQ号'}
+          placeholder={(data.messageType as string) === 'group' ? '输入或选择群号' : '输入或选择QQ号'}
+          type={(data.messageType as string) === 'group' ? 'group' : 'private'}
         />
       </div>
       <div className="space-y-2">
@@ -635,43 +711,20 @@ export function QQSendImageConfig({ data, onChange }: { data: NodeData; onChange
       </div>
       <div className="space-y-2">
         <Label htmlFor="targetId">{(data.messageType as string) === 'group' ? '群号' : 'QQ号'}</Label>
-        <VariableInput
+        <QQContactSelect
           value={(data.targetId as string) || ''}
           onChange={(v) => onChange('targetId', v)}
-          placeholder={(data.messageType as string) === 'group' ? '目标群号' : '目标QQ号'}
+          placeholder={(data.messageType as string) === 'group' ? '输入或选择群号' : '输入或选择QQ号'}
+          type={(data.messageType as string) === 'group' ? 'group' : 'private'}
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="imagePath">图片路径/URL</Label>
-        <div className="flex gap-1">
-          <VariableInput
-            value={(data.imagePath as string) || ''}
-            onChange={(v) => onChange('imagePath', v)}
-            placeholder="本地路径或网络URL"
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="shrink-0"
-            onClick={async () => {
-              try {
-                const result = await systemApi.selectFile('选择图片', undefined, [
-                  ['图片文件', '*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.webp'],
-                  ['所有文件', '*.*']
-                ])
-                if (result.data?.success && result.data.path) {
-                  onChange('imagePath', result.data.path)
-                }
-              } catch (error) {
-                console.error('选择文件失败:', error)
-              }
-            }}
-          >
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={(data.imagePath as string) || ''}
+          onChange={(v) => onChange('imagePath', v)}
+          placeholder="从图像资源中选择或输入路径/URL"
+        />
         <p className="text-xs text-muted-foreground">支持本地文件路径或网络图片URL</p>
       </div>
       <div className="space-y-2">
@@ -726,10 +779,11 @@ export function QQSendFileConfig({ data, onChange }: { data: NodeData; onChange:
       </div>
       <div className="space-y-2">
         <Label htmlFor="targetId">{(data.messageType as string) === 'group' ? '群号' : 'QQ号'}</Label>
-        <VariableInput
+        <QQContactSelect
           value={(data.targetId as string) || ''}
           onChange={(v) => onChange('targetId', v)}
-          placeholder={(data.messageType as string) === 'group' ? '目标群号' : '目标QQ号'}
+          placeholder={(data.messageType as string) === 'group' ? '输入或选择群号' : '输入或选择QQ号'}
+          type={(data.messageType as string) === 'group' ? 'group' : 'private'}
         />
       </div>
       <div className="space-y-2">
@@ -864,10 +918,11 @@ export function QQGetGroupMembersConfig({ data, onChange }: { data: NodeData; on
       </div>
       <div className="space-y-2">
         <Label htmlFor="groupId">群号</Label>
-        <VariableInput
+        <QQContactSelect
           value={(data.groupId as string) || ''}
           onChange={(v) => onChange('groupId', v)}
-          placeholder="要获取成员的群号"
+          placeholder="输入或选择群号"
+          type="group"
         />
       </div>
       <div className="space-y-2">
@@ -944,20 +999,22 @@ export function QQWaitMessageConfig({ data, onChange }: { data: NodeData; onChan
       </div>
       <div className="space-y-2">
         <Label htmlFor="senderId">发送者QQ号（可选）</Label>
-        <VariableInput
+        <QQContactSelect
           value={(data.senderId as string) || ''}
           onChange={(v) => onChange('senderId', v)}
           placeholder="留空则不限制发送者"
+          type="private"
         />
         <p className="text-xs text-muted-foreground">只接收指定QQ号发送的消息</p>
       </div>
       {((data.sourceType as string) === 'group' || (data.sourceType as string) === 'any') && (
         <div className="space-y-2">
           <Label htmlFor="groupId">群号（可选）</Label>
-          <VariableInput
+          <QQContactSelect
             value={(data.groupId as string) || ''}
             onChange={(v) => onChange('groupId', v)}
             placeholder="留空则不限制群"
+            type="group"
           />
           <p className="text-xs text-muted-foreground">只接收指定群的消息</p>
         </div>

@@ -394,7 +394,7 @@ export function ScheduledTasksPage({ onClose }: ScheduledTasksPageProps = {}) {
       )}
       
       {/* 确认对话框 */}
-      {ConfirmDialog}
+      <ConfirmDialog />
     </div>
   )
 }

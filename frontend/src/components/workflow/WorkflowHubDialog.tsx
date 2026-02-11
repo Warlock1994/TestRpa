@@ -2675,7 +2675,7 @@ export function WorkflowHubDialog({ open, onClose }: Props) {
         )}
 
         {/* 确认对话框 */}
-        {ConfirmDialog}
+        <ConfirmDialog />
       </div>
     </div>
   )

@@ -509,21 +509,27 @@ class ClickElementExecutor(ModuleExecutor):
             
             element = current_page.locator(selector).first
             
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            wait_timeout = None if timeout_ms == 0 else timeout_ms
+            
             if wait_for_selector:
                 try:
                     print(f"[ClickElement] 等待元素attached...")
-                    await element.wait_for(state='attached', timeout=timeout_ms)
+                    await element.wait_for(state='attached', timeout=wait_timeout)
                 except Exception as e:
                     print(f"[ClickElement] wait_for失败: {e}，尝试wait_for_selector...")
-                    await current_page.wait_for_selector(selector, state='visible', timeout=timeout_ms)
+                    await current_page.wait_for_selector(selector, state='visible', timeout=wait_timeout)
             
             print(f"[ClickElement] 执行点击...")
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            click_timeout = None if timeout_ms == 0 else timeout_ms
+            
             if click_type == 'double':
-                await element.dblclick()
+                await element.dblclick(timeout=click_timeout)
             elif click_type == 'right':
-                await element.click(button='right')
+                await element.click(button='right', timeout=click_timeout)
             else:
-                await element.click()
+                await element.click(timeout=click_timeout)
             
             print(f"[ClickElement] 点击成功")
             return ModuleResult(success=True, message=f"已点击元素: {selector}")
@@ -569,13 +575,19 @@ class HoverElementExecutor(ModuleExecutor):
             
             element = current_page.locator(selector).first
             
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            wait_timeout = None if timeout_ms == 0 else timeout_ms
+            
             try:
-                await element.wait_for(state='attached', timeout=timeout_ms)
+                await element.wait_for(state='attached', timeout=wait_timeout)
             except:
-                await current_page.wait_for_selector(selector, state='visible', timeout=timeout_ms)
+                await current_page.wait_for_selector(selector, state='visible', timeout=wait_timeout)
+            
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            hover_timeout = None if timeout_ms == 0 else timeout_ms
             
             # 使用 force 参数来绕过遮挡检测
-            await element.hover(force=force, timeout=timeout_ms)
+            await element.hover(force=force, timeout=hover_timeout)
             
             if hover_duration > 0:
                 await asyncio.sleep(hover_duration / 1000)
@@ -634,15 +646,21 @@ class InputTextExecutor(ModuleExecutor):
         try:
             await context.switch_to_latest_page()
             
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            wait_timeout = None if timeout_ms == 0 else timeout_ms
+            
             try:
-                await context.page.wait_for_selector(selector, state='visible', timeout=timeout_ms)
+                await context.page.wait_for_selector(selector, state='visible', timeout=wait_timeout)
             except:
                 pass
             
             element, input_type = await self._find_input_element(context.page, selector)
             
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            click_timeout = None if timeout_ms == 0 else timeout_ms
+            
             if input_type == 'keyboard':
-                await element.click()
+                await element.click(timeout=click_timeout)
                 if clear_before:
                     await context.page.keyboard.press('Control+a')
                     await context.page.keyboard.press('Backspace')
@@ -686,11 +704,14 @@ class GetElementInfoExecutor(ModuleExecutor):
             
             element = context.page.locator(selector).first
             
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            wait_timeout = None if timeout_ms == 0 else timeout_ms
+            
             try:
-                await element.wait_for(state='attached', timeout=timeout_ms)
+                await element.wait_for(state='attached', timeout=wait_timeout)
             except:
                 try:
-                    await context.page.wait_for_selector(selector, state='visible', timeout=timeout_ms)
+                    await context.page.wait_for_selector(selector, state='visible', timeout=wait_timeout)
                     element = context.page.locator(selector).first
                 except:
                     pass
@@ -806,7 +827,10 @@ class WaitElementExecutor(ModuleExecutor):
             }
             state = state_map.get(wait_condition, 'visible')
             
-            await context.page.wait_for_selector(selector, state=state, timeout=wait_timeout)
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            final_timeout = None if wait_timeout == 0 else wait_timeout
+            
+            await context.page.wait_for_selector(selector, state=state, timeout=final_timeout)
             
             condition_labels = {
                 'visible': '可见',
@@ -1990,11 +2014,29 @@ class InjectJavaScriptExecutor(ModuleExecutor):
             results = []
             errors = []
             
-            # 包装用户代码以支持return语句
-            # 如果代码已经是函数形式，直接使用；否则包装成IIFE
+            # 智能包装用户代码
+            # 1. 如果代码已经是完整的函数调用（如 main(vars)），直接使用
+            # 2. 如果代码是函数定义后调用，直接使用
+            # 3. 否则包装成立即执行的异步函数
             wrapped_code = javascript_code.strip()
-            if not (wrapped_code.startswith('(') or wrapped_code.startswith('async') or wrapped_code.startswith('function')):
-                # 包装成立即执行的异步函数，支持return和await
+            
+            # 检查是否需要包装
+            needs_wrapping = True
+            
+            # 如果代码以函数调用结尾（如 main(vars); 或 someFunc()），不需要包装
+            if (')' in wrapped_code and wrapped_code.rstrip().endswith(')') and 
+                not wrapped_code.startswith('(async')):
+                # 可能是函数调用，不包装
+                needs_wrapping = False
+            # 如果代码已经是 IIFE 形式，不需要包装
+            elif wrapped_code.startswith('(') and wrapped_code.rstrip().endswith(')'):
+                needs_wrapping = False
+            # 如果代码以 async 开头，可能是异步函数表达式
+            elif wrapped_code.startswith('async'):
+                needs_wrapping = False
+            
+            # 如果需要包装，包装成立即执行的异步函数
+            if needs_wrapping:
                 wrapped_code = f"(async () => {{ {javascript_code} }})()"
             
             for i, page in enumerate(target_pages):

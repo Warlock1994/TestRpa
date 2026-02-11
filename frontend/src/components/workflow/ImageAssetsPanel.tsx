@@ -753,7 +753,7 @@ export function ImageAssetsPanel() {
         </div>
       )}
 
-      {ConfirmDialog}
+      <ConfirmDialog />
     </div>
   )
 }

@@ -5,8 +5,7 @@ import { Label } from '@/components/ui/label'
 import { VariableInput } from '@/components/ui/variable-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { Button } from '@/components/ui/button'
-import { FolderIcon } from 'lucide-react'
+import { ImagePathInput } from '@/components/ui/image-path-input'
 
 interface BaseConfigProps {
   config: any
@@ -15,39 +14,15 @@ interface BaseConfigProps {
 
 // 图片格式转换配置
 export function ImageFormatConvertConfig({ config, onChange }: BaseConfigProps) {
-  const handleFileSelect = async (field: string) => {
-    try {
-      const result = await (window as any).electron?.showOpenDialog({
-        properties: ['openFile'],
-        filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp', 'tiff', 'ico'] }]
-      })
-      if (result && !result.canceled && result.filePaths.length > 0) {
-        onChange({ ...config, [field]: result.filePaths[0] })
-      }
-    } catch (error) {
-      console.error('文件选择失败:', error)
-    }
-  }
-
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图片路径</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={config.inputPath || ''}
-            onChange={(value) => onChange({ ...config, inputPath: value })}
-            placeholder="输入图片文件路径或使用变量"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => handleFileSelect('inputPath')}
-          >
-            <FolderIcon className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={config.inputPath || ''}
+          onChange={(value) => onChange({ ...config, inputPath: value })}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
 
       <div className="space-y-2">

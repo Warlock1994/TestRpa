@@ -12,8 +12,17 @@ Python313/
 # Node.js 运行环境（约 100-200MB）
 nodejs/
 
-# NapCat QQ机器人框架
-NapCat/
+# NapCat QQ机器人框架（运行时生成的文件，但保留目录结构）
+# 注意：不要删除 NapCat 文件夹中的任何文件，只在 git 中忽略运行时生成的内容
+NapCat/cache/*
+!NapCat/cache/.gitkeep
+NapCat/logs/*
+!NapCat/logs/.gitkeep
+NapCat/config/napcat_*.json
+NapCat/config/onebot11_*.json
+NapCat/config/napcat_protocol_*.json
+NapCat/config/webui.json
+NapCat/conout-*.js
 
 # ============================================
 # 依赖包和构建产物

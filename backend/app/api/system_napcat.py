@@ -76,9 +76,16 @@ async def get_napcat_qrcode():
     
     qrcode_path = napcat_service.get_qrcode_path()
     if qrcode_path and Path(qrcode_path).exists():
-        return FileResponse(path=qrcode_path, media_type="image/png", filename="qrcode.png")
+        # 检查文件是否可读
+        try:
+            with open(qrcode_path, 'rb') as f:
+                f.read(1)  # 尝试读取1字节
+            return FileResponse(path=qrcode_path, media_type="image/png", filename="qrcode.png")
+        except Exception as e:
+            print(f"[NapCat API] 二维码文件读取失败: {e}")
+            raise HTTPException(status_code=503, detail="二维码文件暂时不可用，请稍后重试")
     
-    raise HTTPException(status_code=404, detail="二维码不存在，请先启动 NapCat 服务")
+    raise HTTPException(status_code=404, detail="二维码不存在或已过期，请等待新二维码生成")
 
 
 @router.post("/napcat/stop")

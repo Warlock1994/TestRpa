@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { FolderOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getBackendUrl } from '@/services/api'
+import { ImagePathInput } from '@/components/ui/image-path-input'
 
 interface ConfigProps {
   config: Record<string, unknown>
@@ -416,17 +417,11 @@ export function MarkdownToEPUBConfig({ config, updateConfig }: ConfigProps) {
       </div>
       <div className="space-y-2">
         <Label>封面图片（可选）</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.coverImage || '')}
-            onChange={(v) => updateConfig('coverImage', v)}
-            placeholder="C:/images/cover.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'coverImage', '图片文件|*.jpg;*.png')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.coverImage || '')}
+          onChange={(v) => updateConfig('coverImage', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>结果变量名</Label>

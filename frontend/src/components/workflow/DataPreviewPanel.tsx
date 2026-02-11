@@ -223,7 +223,7 @@ export function DataPreviewPanel({ isOpen, onClose }: DataPreviewPanelProps) {
       </div>
       
       {/* 确认对话框 */}
-      {ConfirmDialog}
+      <ConfirmDialog />
     </div>
   )
 }

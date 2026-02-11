@@ -705,7 +705,7 @@ export function ExcelAssetsPanel() {
         </div>
       )}
 
-      {ConfirmDialog}
+      <ConfirmDialog />
     </div>
   )
 }

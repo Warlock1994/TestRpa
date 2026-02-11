@@ -224,7 +224,7 @@ export function TaskLogsDialog({ task, open, onClose }: TaskLogsDialogProps) {
           )}
         </div>
       </div>
-      {ConfirmDialog}
+      <ConfirmDialog />
     </div>
   )
 }

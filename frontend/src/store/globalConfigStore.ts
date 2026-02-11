@@ -66,6 +66,12 @@ export interface GlobalConfig {
   qq: {
     apiUrl: string
     accessToken: string
+    contacts: Array<{
+      id: string
+      number: string
+      remark: string
+      type: 'private' | 'group'
+    }>
   }
   // 显示设置
   display: {
@@ -151,6 +157,7 @@ const defaultConfig: GlobalConfig = {
   qq: {
     apiUrl: 'http://127.0.0.1:3000',
     accessToken: '',
+    contacts: [],
   },
   display: {
     showMouseCoordinates: false,

@@ -152,7 +152,7 @@ export function useConfirm() {
     setState((prev) => ({ ...prev, isOpen: false, resolve: null }))
   }, [state.resolve])
 
-  const ConfirmDialogComponent = (
+  const ConfirmDialogComponent = () => (
     <ConfirmDialog
       isOpen={state.isOpen}
       type={state.options.type}

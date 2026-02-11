@@ -259,7 +259,10 @@ class WaitElementExecutor(ModuleExecutor):
                 except Exception as e:
                     print(f"[DEBUG wait_element] 查找元素出错: {e}")
             
-            await context.page.wait_for_selector(escaped_selector, state=state, timeout=wait_timeout)
+            # 处理超时参数：0 表示不限制超时，None 表示使用 Playwright 默认超时
+            final_timeout = None if wait_timeout == 0 else wait_timeout
+            
+            await context.page.wait_for_selector(escaped_selector, state=state, timeout=final_timeout)
             
             condition_labels = {'visible': '可见', 'hidden': '隐藏/消失', 'attached': '存在于DOM', 'detached': '从DOM移除'}
             label = condition_labels.get(wait_condition, wait_condition)

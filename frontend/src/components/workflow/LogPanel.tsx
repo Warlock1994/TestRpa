@@ -888,7 +888,7 @@ export function LogPanel({ onLogClick }: LogPanelProps) {
       )}
       
       {/* 确认对话框 */}
-      {ConfirmDialog}
+      <ConfirmDialog />
     </footer>
   )
 }

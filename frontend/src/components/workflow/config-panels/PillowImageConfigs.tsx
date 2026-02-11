@@ -4,38 +4,11 @@ import { SelectNative as Select } from '@/components/ui/select-native'
 import { VariableInput } from '@/components/ui/variable-input'
 import { VariableNameInput } from '@/components/ui/variable-name-input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { FolderOpen } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { getBackendUrl } from '@/services/api'
+import { ImagePathInput } from '@/components/ui/image-path-input'
 
 interface ConfigProps {
   config: Record<string, unknown>
   updateConfig: (key: string, value: unknown) => void
-}
-
-// 选择文件的辅助函数
-const selectFile = async (updateConfig: (key: string, value: unknown) => void, key: string, filter?: string) => {
-  try {
-    let fileTypes: [string, string][] | undefined
-    if (filter) {
-      const parts = filter.split('|')
-      if (parts.length >= 2) {
-        fileTypes = [[parts[0], parts[1]]]
-      }
-    }
-    
-    const response = await fetch(`${getBackendUrl()}/api/system/select-file`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: '选择文件', fileTypes })
-    })
-    const data = await response.json()
-    if (data.success && data.path) {
-      updateConfig(key, data.path)
-    }
-  } catch (error) {
-    console.error('选择文件失败:', error)
-  }
 }
 
 // 图像缩放配置
@@ -44,17 +17,11 @@ export function ImageResizeConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -121,17 +88,11 @@ export function ImageCropConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -201,17 +162,11 @@ export function ImageRotateConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -265,17 +220,11 @@ export function ImageFlipConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -310,17 +259,11 @@ export function ImageBlurConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -359,17 +302,11 @@ export function ImageSharpenConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -409,17 +346,11 @@ export function ImageBrightnessConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -459,17 +390,11 @@ export function ImageContrastConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -509,17 +434,11 @@ export function ImageColorBalanceConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -560,17 +479,11 @@ export function ImageConvertFormatConfig({ config, updateConfig }: ConfigProps) 
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp;*.heic')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -619,17 +532,11 @@ export function ImageAddTextConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -755,17 +662,11 @@ export function ImageThumbnailConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -804,17 +705,11 @@ export function ImageFilterConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>
@@ -857,17 +752,11 @@ export function ImageGetInfoConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>结果变量名</Label>
@@ -888,17 +777,11 @@ export function ImageRemoveBgConfig({ config, updateConfig }: ConfigProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>输入图像</Label>
-        <div className="flex gap-2">
-          <VariableInput
-            value={String(config.inputPath || '')}
-            onChange={(v) => updateConfig('inputPath', v)}
-            placeholder="C:/images/photo.jpg"
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'inputPath', '图片文件|*.jpg;*.png;*.bmp;*.gif;*.webp')}>
-            <FolderOpen className="w-4 h-4" />
-          </Button>
-        </div>
+        <ImagePathInput
+          value={String(config.inputPath || '')}
+          onChange={(v) => updateConfig('inputPath', v)}
+          placeholder="从图像资源中选择或输入路径"
+        />
       </div>
       <div className="space-y-2">
         <Label>输出图像（可选）</Label>

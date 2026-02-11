@@ -30,7 +30,7 @@ export function PhoneScreenshotCropper({ open, onClose, deviceId }: PhoneScreens
   const [templateName, setTemplateName] = useState('')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
-  const { addImageAsset, setBottomPanelTab } = useWorkflowStore()
+  const { setBottomPanelTab } = useWorkflowStore()
 
   // 截取手机屏幕
   const captureScreenshot = async () => {

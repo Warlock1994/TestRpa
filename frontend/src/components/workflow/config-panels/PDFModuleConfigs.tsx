@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { FolderOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getBackendUrl } from '@/services/api'
+import { ImagePathInput } from '@/components/ui/image-path-input'
 
 interface ConfigProps {
   config: Record<string, unknown>
@@ -537,17 +538,11 @@ export function PDFAddWatermarkConfig({ config, updateConfig }: ConfigProps) {
       {config.watermarkType === 'image' ? (
         <div className="space-y-2">
           <Label>水印图片路径</Label>
-          <div className="flex gap-2">
-            <VariableInput
-              value={String(config.watermarkImage || '')}
-              onChange={(v) => updateConfig('watermarkImage', v)}
-              placeholder="C:/images/watermark.png"
-              className="flex-1"
-            />
-            <Button type="button" variant="outline" size="icon" onClick={() => selectFile(updateConfig, 'watermarkImage', '图片文件|*.png;*.jpg;*.jpeg')}>
-              <FolderOpen className="w-4 h-4" />
-            </Button>
-          </div>
+          <ImagePathInput
+            value={String(config.watermarkImage || '')}
+            onChange={(v) => updateConfig('watermarkImage', v)}
+            placeholder="从图像资源中选择或输入路径"
+          />
         </div>
       ) : (
         <div className="space-y-2">

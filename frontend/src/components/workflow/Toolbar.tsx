@@ -731,7 +731,7 @@ export function Toolbar() {
       />
       
       {/* 确认对话框 */}
-      {ConfirmDialog}
+      <ConfirmDialog />
     </header>
   )
 }

@@ -104,16 +104,26 @@ class NapCatService:
             winreg.CloseKey(key)
             
             # 从卸载路径提取 QQ.exe 路径
+            # uninstall_string 格式: "D:\QQ\Uninstall.exe"
+            # 需要去掉引号并提取目录
+            uninstall_string = uninstall_string.strip('"')
             qq_dir = os.path.dirname(uninstall_string)
             qq_path = os.path.join(qq_dir, "QQ.exe")
             
+            print(f"[NapCat] 检测到 QQ 安装路径: {qq_path}")
+            
             if os.path.exists(qq_path):
+                print(f"[NapCat] QQ.exe 存在，检测成功")
                 return {
                     "installed": True,
                     "path": qq_path
                 }
+            else:
+                print(f"[NapCat] QQ.exe 不存在于路径: {qq_path}")
         except Exception as e:
-            pass
+            print(f"[NapCat] 检测 QQ 安装失败: {e}")
+            import traceback
+            traceback.print_exc()
         
         return {
             "installed": False,
@@ -173,7 +183,8 @@ class NapCatService:
                 "error": qq_check.get("error", "QQNT 未安装")
             }
         
-        # 检查 QQ 是否已在运行
+        # 检查 QQ 是否已在运行（仅作为提示，不阻止启动）
+        qq_already_running = False
         try:
             result = subprocess.run(
                 ["tasklist", "/FI", "IMAGENAME eq QQ.exe"],
@@ -182,10 +193,8 @@ class NapCatService:
                 creationflags=subprocess.CREATE_NO_WINDOW
             )
             if "QQ.exe" in result.stdout:
-                return {
-                    "success": False,
-                    "error": "QQ 已在运行中，请先关闭 QQ 再启动 NapCat"
-                }
+                qq_already_running = True
+                print("[NapCat] 检测到已有 QQ 进程在运行，将启动新的 QQ 实例（支持多开）")
         except:
             pass
         
@@ -244,7 +253,8 @@ class NapCatService:
             # 构建命令
             cmd = [str(napcat_launcher), qq_path, str(napcat_hook_dll)]
             if qq_number:
-                cmd.extend(["-q", qq_number])
+                # 使用快速登录参数
+                cmd.extend(["-q", qq_number, "--quick-login"])
             
             print(f"[NapCat] 执行命令: {' '.join(cmd)}")
             
@@ -442,47 +452,108 @@ class NapCatService:
         # 停止监控线程
         self._stop_monitor = True
         
-        # 检查 QQ 进程是否在运行
-        qq_running = False
-        if os.name == 'nt':
-            try:
-                result = subprocess.run(
-                    ["tasklist", "/FI", "IMAGENAME eq QQ.exe"],
-                    capture_output=True,
-                    text=True,
-                    creationflags=subprocess.CREATE_NO_WINDOW
-                )
-                qq_running = "QQ.exe" in result.stdout
-            except:
-                pass
-        
-        if not self.is_running and not qq_running:
+        if not self.is_running:
             return {
                 "success": False,
                 "error": "NapCat 服务未运行"
             }
         
         try:
-            # 尝试终止 QQ 进程
-            if os.name == 'nt':
-                subprocess.run(
-                    ["taskkill", "/F", "/IM", "QQ.exe"],
-                    capture_output=True,
-                    creationflags=subprocess.CREATE_NO_WINDOW
-                )
+            # 记录启动时的 QQ 进程 PID
+            napcat_qq_pids = []
+            qq_closed = False
             
+            # 方法1: 尝试使用 psutil 精确识别子进程
             if self.process:
-                self.process.terminate()
+                try:
+                    import psutil
+                    parent = psutil.Process(self.process.pid)
+                    children = parent.children(recursive=True)
+                    for child in children:
+                        if child.name().lower() == 'qq.exe':
+                            napcat_qq_pids.append(child.pid)
+                            print(f"[NapCat] 识别到 NapCat 启动的 QQ 进程: PID {child.pid}")
+                except ImportError:
+                    print("[NapCat] psutil 未安装，将使用备用方法关闭 QQ")
+                except Exception as e:
+                    print(f"[NapCat] 获取子进程失败: {e}")
+            
+            # 终止 NapCat 启动器进程
+            if self.process:
+                try:
+                    self.process.terminate()
+                    self.process.wait(timeout=5)
+                except:
+                    if self.process:
+                        self.process.kill()
                 self.process = None
+            
+            # 如果识别到了 NapCat 启动的 QQ 进程，精确终止它们
+            if napcat_qq_pids:
+                for pid in napcat_qq_pids:
+                    try:
+                        subprocess.run(
+                            ["taskkill", "/F", "/PID", str(pid)],
+                            capture_output=True,
+                            creationflags=subprocess.CREATE_NO_WINDOW
+                        )
+                        print(f"[NapCat] 已终止 QQ 进程: PID {pid}")
+                        qq_closed = True
+                    except Exception as e:
+                        print(f"[NapCat] 终止 QQ 进程失败 (PID {pid}): {e}")
+            
+            # 方法2: 如果无法精确识别，尝试通过窗口标题关闭（查找包含 QQ 号的窗口）
+            if not qq_closed and self.qq_number:
+                try:
+                    # 使用 tasklist 查找包含 QQ 号的 QQ 进程
+                    result = subprocess.run(
+                        ["tasklist", "/V", "/FI", "IMAGENAME eq QQ.exe", "/FO", "CSV"],
+                        capture_output=True,
+                        text=True,
+                        creationflags=subprocess.CREATE_NO_WINDOW
+                    )
+                    
+                    # 解析输出，查找包含当前 QQ 号的进程
+                    import csv
+                    from io import StringIO
+                    
+                    reader = csv.reader(StringIO(result.stdout))
+                    next(reader, None)  # 跳过标题行
+                    
+                    for row in reader:
+                        if len(row) >= 2:
+                            pid = row[1].strip('"')
+                            window_title = row[-1].strip('"') if len(row) > 8 else ""
+                            
+                            # 检查窗口标题是否包含当前 QQ 号
+                            if self.qq_number in window_title:
+                                try:
+                                    subprocess.run(
+                                        ["taskkill", "/F", "/PID", pid],
+                                        capture_output=True,
+                                        creationflags=subprocess.CREATE_NO_WINDOW
+                                    )
+                                    print(f"[NapCat] 通过窗口标题识别并终止 QQ 进程: PID {pid} (QQ: {self.qq_number})")
+                                    qq_closed = True
+                                except Exception as e:
+                                    print(f"[NapCat] 终止 QQ 进程失败 (PID {pid}): {e}")
+                except Exception as e:
+                    print(f"[NapCat] 通过窗口标题查找 QQ 进程失败: {e}")
             
             self.is_running = False
             self.qq_number = None  # 清除登录状态
             self.webui_url = None  # 清除 WebUI URL
             
-            return {
-                "success": True,
-                "message": "NapCat 服务已停止"
-            }
+            if qq_closed:
+                return {
+                    "success": True,
+                    "message": "NapCat 服务已停止，QQ 窗口已关闭"
+                }
+            else:
+                return {
+                    "success": True,
+                    "message": "NapCat 服务已停止（无法自动关闭 QQ 窗口，请手动关闭）"
+                }
         except Exception as e:
             return {
                 "success": False,
@@ -510,18 +581,45 @@ class NapCatService:
             except:
                 pass
         
-        # 如果 QQ 在运行但还没有检测到 qq_number，尝试多种方法检测
-        if qq_running and not self.qq_number:
+        # 检查 OneBot API 是否可用（这是判断 NapCat 是否真正运行的关键）
+        onebot_available = False
+        onebot_logged_in = False
+        detected_qq_number = None
+        
+        try:
+            response = httpx.post(
+                'http://127.0.0.1:3000/get_login_info',
+                json={},
+                timeout=2
+            )
+            result = response.json()
+            onebot_available = True
+            
+            if result.get('status') == 'ok' and result.get('data', {}).get('user_id'):
+                onebot_logged_in = True
+                detected_qq_number = str(result['data']['user_id'])
+                print(f"[NapCat] get_status: OneBot API 检测到登录 QQ {detected_qq_number}")
+        except Exception as e:
+            # OneBot API 不可用
+            print(f"[NapCat] get_status: OneBot API 不可用 - {e}")
+            onebot_available = False
+        
+        # 如果 OneBot API 检测到登录，更新 qq_number
+        if detected_qq_number:
+            self.qq_number = detected_qq_number
+        
+        # 如果 QQ 在运行但 OneBot API 不可用，尝试从配置文件检测
+        if qq_running and not onebot_available:
             config_dir = self.napcat_dir / "config"
             logs_dir = self.napcat_dir / "logs"
             
-            # 方法1: 从配置目录检测 napcat_<QQ号>.json 文件（最可靠）
+            # 方法1: 从配置目录检测 napcat_<QQ号>.json 文件
             if config_dir.exists():
                 for config_file in config_dir.glob("napcat_*.json"):
                     match = re.search(r'napcat_(\d+)\.json', config_file.name)
                     if match:
-                        self.qq_number = match.group(1)
-                        print(f"[NapCat] get_status: 从配置文件检测到登录 QQ {self.qq_number}")
+                        detected_qq_number = match.group(1)
+                        print(f"[NapCat] get_status: 从配置文件检测到 QQ {detected_qq_number}（但 OneBot API 不可用）")
                         break
             
             # 方法2: 从日志文件提取 WebUI URL
@@ -536,30 +634,35 @@ class NapCatService:
                                 self.webui_url = webui_match.group(0)
                     except:
                         pass
-            
-            # 方法3: 调用 OneBot API（需要用户已配置 HTTP 服务）
-            if not self.qq_number:
-                try:
-                    response = httpx.post(
-                        'http://127.0.0.1:3000/get_login_info',
-                        json={},
-                        timeout=2
-                    )
-                    result = response.json()
-                    if result.get('status') == 'ok' and result.get('data', {}).get('user_id'):
-                        self.qq_number = str(result['data']['user_id'])
-                        print(f"[NapCat] get_status: OneBot API 检测到登录 QQ {self.qq_number}")
-                except:
-                    pass
+        
+        # 判断 NapCat 是否真正运行：
+        # 1. QQ 进程在运行
+        # 2. OneBot API 可用（这是关键！）
+        napcat_really_running = qq_running and onebot_available
+        
+        # 更新内部状态
+        if napcat_really_running:
+            self.is_running = True
+            if detected_qq_number:
+                self.qq_number = detected_qq_number
+        elif not qq_running:
+            # QQ 进程都不在了，清除状态
+            self.is_running = False
+            self.qq_number = None
+            self.webui_url = None
         
         return {
             "napcat_installed": install_check["installed"],
             "qq_installed": qq_check["installed"],
             "qq_path": qq_check.get("path"),
-            "is_running": self.is_running or qq_running,
+            "is_running": napcat_really_running,  # 只有 OneBot API 可用才算真正运行
+            "qq_running": qq_running,  # 额外返回 QQ 进程状态
+            "onebot_available": onebot_available,  # OneBot API 是否可用
+            "onebot_logged_in": onebot_logged_in,  # 是否已登录
             "qq_number": self.qq_number,
             "webui_url": self.webui_url,
-            "onebot_port": self.onebot_config["http"]["port"]
+            "onebot_port": self.onebot_config["http"]["port"],
+            "qrcode_available": self.get_qrcode_path() is not None
         }
     
     def update_config(self, qq_number: str, config_updates: Dict) -> Dict[str, Any]:
