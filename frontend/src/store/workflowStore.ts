@@ -281,6 +281,13 @@ export const moduleTypeLabels: Record<ModuleType, string> = {
   phone_set_brightness: '📱 设置亮度',
   phone_set_clipboard: '📱 写入剪贴板',
   phone_get_clipboard: '📱 读取剪贴板',
+  // 测试报告
+  allure_init: 'Allure初始化',
+  allure_start_test: '开始测试用例',
+  allure_add_step: '添加测试步骤',
+  allure_add_attachment: '添加附件',
+  allure_stop_test: '结束测试用例',
+  allure_generate_report: '生成测试报告',
   // AI能力
   ai_chat: 'AI对话',
   ai_vision: '图像识别',
@@ -717,6 +724,13 @@ export const moduleDefaultTimeouts: Partial<Record<ModuleType, number>> = {
   phone_set_brightness: 10000, // 10秒
   phone_set_clipboard: 10000, // 10秒
   phone_get_clipboard: 10000, // 10秒
+  // 测试报告
+  allure_init: 30000,          // 30秒
+  allure_start_test: 10000,    // 10秒
+  allure_add_step: 5000,       // 5秒
+  allure_add_attachment: 60000, // 1分钟，文件复制可能较慢
+  allure_stop_test: 10000,     // 10秒
+  allure_generate_report: 300000, // 5分钟，生成报告可能较慢
   // 网络共享
   share_folder: 10000,       // 10秒
   share_file: 10000,         // 10秒

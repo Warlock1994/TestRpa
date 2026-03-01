@@ -5,8 +5,8 @@
 Web RPA - 网页机器人流程自动化工具
 </h1>
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-1.30.28-blue.svg" alt="版本">
-  <img src="https://img.shields.io/badge/模块数量-267个-brightgreen.svg" alt="模块数量">
+  <img src="https://img.shields.io/badge/版本-1.31.0-blue.svg" alt="版本">
+  <img src="https://img.shields.io/badge/模块数量-273个-brightgreen.svg" alt="模块数量">
   <img src="https://img.shields.io/badge/协议-AGPL--3.0%20%2B%20商业授权-green.svg" alt="协议">
   <img src="https://img.shields.io/badge/作者-青云制作__彭明航-orange.svg" alt="作者">
   <img src="https://img.shields.io/badge/Python-3.13-blue.svg" alt="Python">
@@ -24,11 +24,11 @@ Web RPA - 网页机器人流程自动化工具
 
 - **🚀 零代码开发**：可视化拖拽，无需编程基础
 - **📦 开箱即用**：内置Python、Node.js环境，一键启动
-- **🔧 模块丰富**：267个功能模块，覆盖90%自动化场景
+- **🔧 模块丰富**：273个功能模块，覆盖90%自动化场景
 - **🎨 界面美观**：现代化UI设计，操作流畅，支持Mermaid流程图
 - **⚡ 性能强劲**：基于FastAPI + React，响应迅速
 - **🔌 易于扩展**：模块化架构，支持自定义开发
-- **📚 文档完善**：18个分类的详细教学文档，覆盖所有267个模块
+- **📚 文档完善**：18个分类的详细教学文档，覆盖所有273个模块
 - **🆓 完全免费**：非商业使用完全免费，开源透明
 - **🔍 智能搜索**：模块和教学文档支持中文、拼音、拼音首字母模糊搜索
 - **📊 可视化流程**：内置Mermaid流程图，直观展示工作流逻辑
@@ -524,7 +524,8 @@ WebRPA/
 | 💬 用户交互 | 1 |
 | 🎯 脚本执行 | 2 |
 | 📝 画布工具 | 2 |
-| **总计** | **267 个模块** |
+| 📊 测试报告 | 6 |
+| **总计** | **273 个模块** |
 
 ---
 
@@ -737,7 +738,7 @@ WebRPA/
 
 - ❌ 移除 NapCat 和所有 QQ 机器人功能（8个模块）
 - ❌ 移除 pdf2docx 和 PDF 转 Word 功能（1个模块）
-- ✅ 保留其他所有功能（258个模块）
+- ✅ 保留其他所有功能（264个模块）
 - ✅ 完全无许可证风险
 - ✅ 可以闭源商业使用
 
@@ -755,7 +756,7 @@ WebRPA/
 - ✅ 可以集成到商业产品中
 - ✅ 可以提供付费服务
 - ✅ 获得商业技术支持
-- ✅ 保留 258 个功能模块
+- ✅ 保留 264 个功能模块
 
 **移除的功能**：
 

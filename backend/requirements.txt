@@ -126,3 +126,10 @@ nest-asyncio>=1.6.0
 
 # 语音识别（高级）- 音频转文本模块
 faster-whisper>=1.2.0
+
+# 测试报告（Allure模块）
+# 注意：生成HTML报告需要单独安装 Allure 命令行工具
+# 安装命令：npm install -g allure-commandline
+# 或访问：https://docs.qameta.io/allure/
+# allure-python-commons 仅用于生成测试结果数据
+allure-python-commons>=2.13.0

@@ -310,6 +310,13 @@ export type ModuleType =
   | 'phone_set_brightness'
   | 'phone_set_clipboard'
   | 'phone_get_clipboard'
+  // 测试报告
+  | 'allure_init'
+  | 'allure_start_test'
+  | 'allure_add_step'
+  | 'allure_add_attachment'
+  | 'allure_stop_test'
+  | 'allure_generate_report'
 
 // Excel文件资源
 export interface DataAsset {

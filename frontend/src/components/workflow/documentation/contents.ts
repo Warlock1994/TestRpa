@@ -17,6 +17,7 @@ import { filesGuideContent } from './content-files'
 import { pdfGuideContent } from './content-pdf'
 import { triggersGuideContent } from './content-triggers'
 import { phoneGuideContent } from './content-phone'
+import { testReportContent } from './content-test-report'
 
 export const documentContents: Record<string, string> = {
   'getting-started': gettingStartedContent,
@@ -28,6 +29,7 @@ export const documentContents: Record<string, string> = {
   'database-guide': databaseGuideContent,
   'triggers-guide': triggersGuideContent,
   'phone-guide': phoneGuideContent,
+  'test-report-guide': testReportContent,
   'advanced-features': advancedFeaturesContent,
   'selector-guide': selectorGuideContent,
   'notifications-guide': notificationsGuideContent,

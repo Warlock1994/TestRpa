@@ -159,6 +159,7 @@ import {
   FlipHorizontal,
   Play,
 } from 'lucide-react'
+import { TestReportIcon } from './icons/TestReportIcon'
 
 // 收藏模块现在统一由 moduleStatsStore 管理，不再使用单独的 localStorage
 
@@ -474,6 +475,13 @@ const moduleIcons: Record<ModuleType, React.ElementType> = {
   hex_to_cmyk: Palette,
   uuid_generator: Hash,
   printer_call: Printer,
+  // 测试报告
+  allure_init: TestReportIcon,
+  allure_start_test: TestReportIcon,
+  allure_add_step: TestReportIcon,
+  allure_add_attachment: TestReportIcon,
+  allure_stop_test: TestReportIcon,
+  allure_generate_report: TestReportIcon,
 }
 
 // 模块搜索关键词（用于模糊搜索）
@@ -770,6 +778,13 @@ const moduleKeywords: Record<ModuleType, string[]> = {
   hex_to_cmyk: ['HEX', 'CMYK', '颜色', '转换', 'color', 'convert', '十六进制', '印刷'],
   uuid_generator: ['UUID', '生成', 'generate', '唯一', '标识符', 'guid', '随机'],
   printer_call: ['打印', '打印机', 'printer', 'print', '文档', 'PDF', 'Word', '图片'],
+  // 测试报告
+  allure_init: ['Allure', '初始化', '测试', '报告', 'test', 'report', 'init', '环境', '配置'],
+  allure_start_test: ['Allure', '开始', '测试', '用例', 'test', 'case', 'start', '创建'],
+  allure_add_step: ['Allure', '添加', '步骤', 'step', 'add', '测试', '记录'],
+  allure_add_attachment: ['Allure', '添加', '附件', 'attachment', 'add', '截图', '文件', '日志'],
+  allure_stop_test: ['Allure', '结束', '测试', '用例', 'test', 'case', 'stop', '完成'],
+  allure_generate_report: ['Allure', '生成', '报告', 'report', 'generate', '测试', 'HTML'],
 }
 
 // 模块分类 - 优化后更清晰的分类结构
@@ -1009,6 +1024,12 @@ const moduleCategories = [
     name: '🎯 脚本执行',
     color: 'bg-slate-700',
     modules: ['js_script', 'python_script'] as ModuleType[],
+  },
+  // ===== 测试报告 =====
+  {
+    name: '📊 测试报告',
+    color: 'bg-emerald-600',
+    modules: ['allure_init', 'allure_start_test', 'allure_add_step', 'allure_add_attachment', 'allure_stop_test', 'allure_generate_report'] as ModuleType[],
   },
   // ===== 画布工具 =====
   {

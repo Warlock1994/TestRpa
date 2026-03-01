@@ -217,9 +217,8 @@ class ClickImageExecutor(ModuleExecutor):
                 inp.mi.dwFlags = event_flag
                 inp.mi.time = 0
                 inp.mi.dwExtraInfo = ctypes.pointer(ctypes.c_ulong(0))
-                # 使用数组类型而不是指针
-                inp_array = (INPUT * 1)(inp)
-                user32.SendInput(1, inp_array, ctypes.sizeof(INPUT))
+                # 使用ctypes.byref传递结构体指针，兼容性更好
+                user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
 
             # 使用 SetCursorPos 移动鼠标（更精确）
             user32.SetCursorPos(int(click_x), int(click_y))

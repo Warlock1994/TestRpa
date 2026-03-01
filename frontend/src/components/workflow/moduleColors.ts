@@ -349,6 +349,14 @@ export const moduleColors: Record<ModuleType, string> = {
   python_script: 'border-gray-500 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100',
   export_log: 'border-gray-500 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100',
 
+  // ===== 📊 测试报告 - 翠绿色 =====
+  allure_init: 'border-emerald-600 bg-emerald-100 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100',
+  allure_start_test: 'border-emerald-600 bg-emerald-100 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100',
+  allure_add_step: 'border-emerald-600 bg-emerald-100 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100',
+  allure_add_attachment: 'border-emerald-600 bg-emerald-100 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100',
+  allure_stop_test: 'border-emerald-600 bg-emerald-100 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100',
+  allure_generate_report: 'border-emerald-600 bg-emerald-100 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100',
+
   // ===== 📝 分组/备注 - 特殊颜色 =====
   group: 'border-gray-400 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
   note: 'border-yellow-500 bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100',

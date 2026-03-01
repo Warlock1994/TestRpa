@@ -1,6 +1,6 @@
 {
   "name": "framework-hub",
-  "version": "1.30.28",
+  "version": "1.31.0",
   "description": "Web RPA 工作流仓库服务",
   "main": "src/index.js",
   "type": "module",

@@ -205,6 +205,14 @@ import {
   WeChatSendFileConfig,
 } from './config-panels/WeChatModuleConfigs'
 import {
+  AllureInitConfig,
+  AllureStartTestConfig,
+  AllureAddStepConfig,
+  AllureAddAttachmentConfig,
+  AllureStopTestConfig,
+  AllureGenerateReportConfig,
+} from './config-panels/TestAllureConfigs'
+import {
   PhoneTapConfig,
   PhoneSwipeConfig,
   PhoneLongPressConfig,
@@ -1148,6 +1156,19 @@ export function ConfigPanel({ selectedNodeId: propSelectedNodeId }: ConfigPanelP
         return <UUIDGeneratorConfig config={nodeData} updateConfig={handleChange} />
       case 'printer_call':
         return <PrinterCallConfig config={nodeData} updateConfig={handleChange} />
+      // 测试报告模块
+      case 'allure_init':
+        return <AllureInitConfig data={nodeData} onChange={handleChange} />
+      case 'allure_start_test':
+        return <AllureStartTestConfig data={nodeData} onChange={handleChange} />
+      case 'allure_add_step':
+        return <AllureAddStepConfig data={nodeData} onChange={handleChange} />
+      case 'allure_add_attachment':
+        return <AllureAddAttachmentConfig data={nodeData} onChange={handleChange} />
+      case 'allure_stop_test':
+        return <AllureStopTestConfig data={nodeData} onChange={handleChange} />
+      case 'allure_generate_report':
+        return <AllureGenerateReportConfig data={nodeData} onChange={handleChange} />
       case 'group':
         return <GroupConfig data={nodeData} onChange={handleChange} />
       case 'subflow_header':
